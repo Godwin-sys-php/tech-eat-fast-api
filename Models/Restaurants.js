@@ -3,16 +3,9 @@ const uniqueValidator = require('mongoose-unique-validator');
 
 const restaurantSchema = mongoose.Schema({
   name: { type: String, required: true, unique: true },
-  website: { type: String, unique: true },
+  website: { type: String },
   address: { type: String, required: true, unique: true },
-  logoUrl: { type: String, required: true, unique: true },
-  color: { type: String, required: true, default: "green" },
-
-  like: { type: Number, required: true, default: 0 }, // Nombre de like
-  dislike: { type: Number, required: true, default: 0 }, // Nombre de dislike
-
-  usersLiked: { type: [String] }, // Tableau avec les id des users qui ont liker
-  usersDisliked: { type: [String] }, // Tableau avec les id des users qui ont disliker
+  logoUrl: { type: String, required: true },
 
   creationDate: { type: Date, required: true },
   
@@ -33,10 +26,6 @@ const restaurantSchema = mongoose.Schema({
  */
   
   paymentMethodAccept: { type: [String], required: true }, // Possiblilité: CB, m-pesa, airtel-money, orange-money, direct-cash
-
-  status: { type: String, required: true, default: "dispo" },
-
-  valid: { type: Boolean, required: true, default: true }
 });
 
 restaurantSchema.plugin(uniqueValidator);

@@ -7,19 +7,12 @@ const dishSchema = mongoose.Schema({
   idMenu: { type: String, required: true },
   name: { type: String, required: true },
   description: { type: String },
-  price: { type: Number },
+  price: { type: Number, required: true },
   creationDate: { type: Date, required: true },
-  lastUpdate: { type: Date },
 
   imageUrl: { type: String, required: true },
 
   ingredients: { type: [String] },
-
-  like: { type: Number, required: true, default: 0 }, // Nombre de like
-  dislike: { type: Number, required: true, default: 0 }, // Nombre de dislike
-
-  usersLiked: { type: [String] }, // Tableau avec les id des users qui ont liker
-  usersDisliked: { type: [String] }, // Tableau avec les id des users qui ont disliker
 
   available: { type: Boolean, required: true, default: true }
 });
