@@ -1,7 +1,7 @@
 const Resto = require("../../Models/Restaurants");
 
 module.exports = (req, res, next) => {
-  Resto.findOne({ _id: req.params.idRestaurant, valid: true })
+  Resto.findOne({ _id: req.params.idRestaurant })
     .then(resto => {
       if (resto) {
         next();

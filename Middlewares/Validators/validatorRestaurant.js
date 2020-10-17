@@ -1,9 +1,10 @@
 const _ = require('underscore');
 const Resto = require('../../Models/Restaurants');
+const verifyPaymentMethod = require('../../Helpers/verifyPaymentMethod');
 
 module.exports = (req, res, next) => {
   try {
-    let paymentCondition = req.body.paymentMethodAccept.includes('CB') || req.body.paymentMethodAccept.includes('m-pesa') || req.body.paymentMethodAccept.includes('airtel-money') || req.body.paymentMethodAccept.includes('orange-money') || req.body.paymentMethodAccept.includes('direct-cash');
+    let paymentCondition = verifyPaymentMethod(req.body.paymentMethodAccept);
 
     let condition = ((req.body.name.length >= 2 && req.body.name.length <= 50 && _.isString(req.body.name)) && (req.body.address.length >= 2 && req.body.address.length <= 75 && _.isString(req.body.address)) && (paymentCondition));
 

@@ -11,6 +11,7 @@ const userCtrl = require('../Controllers/Users');
 
 router.post('/signup', limits(20, 15), validatorUsers, userCtrl.signup) ; // Inscrit un utilisateur
 router.post('/login', limits(10, 15), userCtrl.login); // Connecte un utilisateur
+router.post('/login-no-jwt', limits(10, 15), userCtrl.loginNoJwt); // Connecte un utilisateur sans lui donner un jwt
 
 router.put('/:idUser', limits(30, 15), existUser, authUserMostSecure, validatorUsers, userCtrl.updateOneUser); // Modifie un utilisateur
 

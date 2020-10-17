@@ -5,7 +5,7 @@ module.exports = (req, res, next) => {
   Dishes.findOne({ _id: req.params.idDish })
     .then(dish => {
       if (dish) {
-        Resto.findOne({ _id: dish.idRestaurant, valid: true })
+        Resto.findOne({ _id: dish.idRestaurant })
           .then(resto => {
             if (resto) {
               next();

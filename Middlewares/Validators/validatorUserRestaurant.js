@@ -18,12 +18,10 @@ module.exports = (req, res, next) => {
 
     let condition2= (req.body.name.length >= 2 && req.body.name.length < 30 && _.isString(req.body.name)) && validator.isEmail(req.body.email) && (req.body.level >= 1 && req.body.level < 4);
 
-    req.params.idRestaurant == req.body.idRestaurant ? () => { } : res.status(400).json({ invalidIdRestaurant: true, message: "idRestaurant in params no equal to idRestaurant in body" });
-
     if (req.method == 'PUT') {
       if (req.body.password) {
         if (condition) {
-          UserResto.findOne({ email: req.body.email, _id: { $ne: req.params.idUserRestaurant } })
+          UserResto.findOne({ email: req.body.email, _id: { $ne: req.params.idUserResto } })
             .then(user => {
               !user ? next() : res.status(400).json({ existEmail: true });
             })
@@ -35,7 +33,7 @@ module.exports = (req, res, next) => {
         }
       } else {
         if (condition2) {
-          UserResto.findOne({ email: req.body.email, _id: { $ne: req.params.idUserRestaurant } })
+          UserResto.findOne({ email: req.body.email, _id: { $ne: req.params.idUserResto } })
             .then(user => {
               !user ? next() : res.status(400).json({ existEmail: true });
             })

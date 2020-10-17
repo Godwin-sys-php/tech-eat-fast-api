@@ -6,6 +6,9 @@ const helmet = require('helmet');
 const mongoose = require('mongoose');
 
 const usersRoute = require('./Routes/Users');
+const usersRestaurantRoute = require('./Routes/UsersRestaurant');
+const restaurantRoute = require('./Routes/Restaurants');
+const menusRoute = require('./Routes/Menus');
 
 require('dotenv').config();
 
@@ -29,5 +32,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 
 app.use('/users', usersRoute);
+app.use('/users-restaurant', usersRestaurantRoute);
+app.use('/restaurant', restaurantRoute);
+app.use('/menus', menusRoute);
+// app.use('/commands', commandsRoute);
 
 module.exports = app;

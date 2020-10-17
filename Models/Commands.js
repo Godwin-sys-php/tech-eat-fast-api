@@ -4,7 +4,7 @@ const uniqueValidator = require('mongoose-unique-validator');
 
 const commandSchema = mongoose.Schema({
   idRestaurant: { type: String, required: true },
-  orderId: { type: String, required: true, unique: false },
+  orderId: { type: String, required: true, unique: true },
   idDeliverer: { type: String, required: false },
   idUser: { type: String, required: true },
   phoneNumber: { type: Number, required: false },
@@ -13,7 +13,7 @@ const commandSchema = mongoose.Schema({
   address: { type: String },
   creationDate: { type: Date, required: true },
   lastUpdate: { type: Date, required: true },
-  type: { type: String, required: true }, // toTake, toDelive
+  type: { type: String, required: true }, // toTake, toDeliver
 
   /*
     Structure: 

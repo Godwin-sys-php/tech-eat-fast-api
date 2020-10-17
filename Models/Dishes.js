@@ -10,7 +10,7 @@ const dishSchema = mongoose.Schema({
   price: { type: Number, required: true },
   creationDate: { type: Date, required: true },
 
-  imageUrl: { type: String, required: true },
+  imageUrl: { type: String, required: false },
 
   ingredients: { type: [String] },
 

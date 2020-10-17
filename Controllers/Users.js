@@ -56,6 +56,32 @@ exports.login = (req, res) => {
     });
 };
 
+exports.loginNoJwt = (req, res) => {
+  Users.findOne({ $or: [{ email: req.body.identifiant }, { pseudo: req.body.identifiant }] })
+    .then((user) => {
+      if (!user) {
+        res.status(404).json({ identifiant: false, password: false });
+      } else {
+        bcrypt.compare(req.body.password, user.password)
+          .then((valid) => {
+            if (!valid) {
+              res.status(401).json({ identifiant: true, password: false });
+            } else {
+              res.status(200).json({
+                idUser: user._id
+              });
+            }
+          })
+          .catch(error => {
+            res.status(500).json({ error: true, errorMessage: error });
+          });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({ error: true, errorMessage: error });
+    });
+};
+
 exports.updateOneUser = (req, res) => {
   let toSet;
   if (req.body.password) {
