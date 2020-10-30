@@ -17,13 +17,15 @@ exports.login = (req, res) => {
             } else {
               res.status(200).json({
                 idUser: user._id,
+                idRestaurant: user.idRestaurant,
                 token: jwt.sign({ idUserRestaurant: user._id, idRestaurant: user.idRestaurant }, process.env.TOKEN, {
-                  expiresIn: "30h",
+                  expiresIn: "2d",
                 })
               });
             }
           })
           .catch(error => {
+            console.log(error);
             res.status(500).json({ error: true, errorMessage: error });
           });
       }
@@ -43,6 +45,7 @@ exports.addOneUser = (req, res) => {
         email: req.body.email,
         creationDate: now.toUTCString(),
         level: req.body.level,
+        pdpUrl: `${req.protocol}://${req.get('host')}/PDP_Resto/default.jpg`,
         password: hash
       });
       userToInsert.save()
