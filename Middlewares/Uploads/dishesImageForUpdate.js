@@ -1,5 +1,5 @@
 module.exports = (req, res, next) => {
-  if (req.files && req.files.logo) {
+  if (req.files && req.files.imageDish) {
     const MIME_TYPES = {
       "image/jpg": "jpg",
       "image/jpeg": "jpg",
@@ -10,13 +10,13 @@ module.exports = (req, res, next) => {
       "image/jpeg",
       "image/png"
     ];
-    const imageUpload = req.files.logo;
+    const imageUpload = req.files.imageDish;
     
     if (MIME_TYPES_ARRAY.includes(imageUpload.mimetype)) {
       const extension = MIME_TYPES[imageUpload.mimetype];
       const timestamp = Date.now();
-      imageUpload.mv(`./Images-Resto/${req.params.idRestaurant}.${timestamp}.${extension}`);
-      req.file = { filename: `${req.params.idRestaurant}.${timestamp}.${extension}` };
+      imageUpload.mv(`./Images-Dishes/${imageUpload.name}_${timestamp}.${extension}`);
+      req.file = { filename: `${imageUpload.name}_${timestamp}.${extension}` };
       next();
     } else {
       res.status(400).json({ badFile: true });

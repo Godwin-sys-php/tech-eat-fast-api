@@ -1,11 +1,11 @@
 const Menus = require("../Models/Menus");
+const Dishes = require("../Models/Dishes");
 
 exports.addMenu = (req, res) => {
   const now = new Date();
   const toInsert = new Menus({
     idRestaurant: req.params.idRestaurant,
     name: req.body.name,
-    description: req.body.description,
     creationDate: now.toUTCString()
   });
 
@@ -21,7 +21,6 @@ exports.addMenu = (req, res) => {
 exports.updateMenu = (req, res) => {
   const toSet = {
     name: req.body.name,
-    description: req.body.description
   };
 
   Menus.updateOne({ _id: req.params.idMenu }, toSet)
@@ -53,14 +52,26 @@ exports.getOneMenu = (req, res) => {
     });
 };
 
-exports.getMostPopular = (req, res) => {
-  res.status(200).json({ inDev: true });
-};
-
 exports.deleteOneMenu = (req, res) => {
-  Menus.deleteOne({ _id: req.params.idMenu })
-    .then(() => {
-      res.status(200).json({ delete: true });
+  Menus.find() 
+    .then(menus => {
+      if (menus.length <= 1) {
+        res.status(400).json({ cantHaveZeroMenu: true });
+      } else {
+        Dishes.deleteMany({ idMenu: req.params.idMenu })
+          .then(() => {
+            Menus.deleteOne({ _id: req.params.idMenu })
+              .then(() => {
+                res.status(200).json({ delete: true });
+              })
+              .catch(error => {
+                res.status(500).json({ error: true, errorMessage: error });
+              });
+          })
+          .catch(error => {
+            res.status(500).json({ error: true, errorMessage: error });
+          });
+      }
     })
     .catch(error => {
       res.status(500).json({ error: true, errorMessage: error });

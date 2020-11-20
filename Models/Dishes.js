@@ -12,8 +12,6 @@ const dishSchema = mongoose.Schema({
 
   imageUrl: { type: String, required: false },
 
-  ingredients: { type: [String] },
-
   available: { type: Boolean, required: true, default: true }
 });
 

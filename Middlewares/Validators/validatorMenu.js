@@ -6,10 +6,7 @@ module.exports = (req, res, next) => {
     if (
       req.body.name.length >= 2 &&
       req.body.name.length < 30 &&
-      _.isString(req.body.name) &&
-      req.body.description.length >= 2 &&
-      req.body.description.length < 200 &&
-      _.isString(req.body.description)
+      _.isString(req.body.name)
     ) {
       Menus.findOne({
         name: req.body.name,

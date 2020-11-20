@@ -23,7 +23,21 @@ module.exports = (req, res, next) => {
         if (condition) {
           UserResto.findOne({ email: req.body.email, _id: { $ne: req.params.idUserResto } })
             .then(user => {
-              !user ? next() : res.status(400).json({ existEmail: true });
+              if (!user) {
+                UserResto.find({ idRestaurant: req.idRestaurant, level: 3 })
+                  .then(users => {
+                    if (users.length == 1 && users[0]._id == req.params.idUserResto && req.body.level < 3) {
+                      res.status(400).json({ cantChangeLevelOfLastAdmin: true });
+                    } else {
+                      next();
+                    }
+                  })
+                  .catch(error => {
+                    res.status(500).json({ error: true, errorMessage: error });
+                  });
+              } else {
+                res.status(400).json({ existEmail: true });
+              }
             })
             .catch(error => {
               res.status(500).json({ error: true, errorMessage: error });
@@ -35,7 +49,21 @@ module.exports = (req, res, next) => {
         if (condition2) {
           UserResto.findOne({ email: req.body.email, _id: { $ne: req.params.idUserResto } })
             .then(user => {
-              !user ? next() : res.status(400).json({ existEmail: true });
+              if (!user) {
+                UserResto.find({ idRestaurant: req.idRestaurant, level: 3 })
+                  .then(users => {
+                    if (users.length == 1 && users[0]._id == req.params.idUserResto && req.body.level < 3) {
+                      res.status(400).json({ cantChangeLevelOfLastAdmin: true });
+                    } else {
+                      next();
+                    }
+                  })
+                  .catch(error => {
+                    res.status(500).json({ error: true, errorMessage: error });
+                  });
+              } else {
+                res.status(400).json({ existEmail: true });
+              }
             })
             .catch(error => {
               res.status(500).json({ error: true, errorMessage: error });

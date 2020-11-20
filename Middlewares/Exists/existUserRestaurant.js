@@ -8,6 +8,7 @@ module.exports = (req, res, next) => {
         Resto.findOne({ _id: user.idRestaurant })
           .then(resto => {
             if (resto) {
+              req.idRestaurant = user.idRestaurant;
               next();
             } else {
               res.status(404).json({ userNotFound: true });

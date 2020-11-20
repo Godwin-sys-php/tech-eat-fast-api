@@ -2,13 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const helmet = require('helmet');
-
+const fileUpload = require("express-fileupload");
 const mongoose = require('mongoose');
 
 const usersRoute = require('./Routes/Users');
 const usersRestaurantRoute = require('./Routes/UsersRestaurant');
 const restaurantRoute = require('./Routes/Restaurants');
 const menusRoute = require('./Routes/Menus');
+const dishesRoute = require('./Routes/Dishes');
 const mongoSanitize = require('mongo-sanitize');
 const xss = require('xss');
 const path = require('path');
@@ -30,6 +31,8 @@ mongoose.connect(process.env.DATABASE_STRING_CONNECTION)
 const app = express();
 
 app.use(cors()); // On accepte toute les requêtes de n'importe quelle serveur
+
+app.use(fileUpload({ createParentPath: true })); // File Upload
 
 // BodyParser
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
@@ -56,16 +59,20 @@ app.use(
   "/PDP_Resto",
   express.static(path.join(__dirname, "PDP_Resto"))
 );
-
 app.use(
   "/Images-Resto",
   express.static(path.join(__dirname, "Images-Resto"))
+);
+app.use(
+  "/Images-Dishes",
+  express.static(path.join(__dirname, "Images-Dishes"))
 );
 
 app.use('/users', usersRoute);
 app.use('/users-restaurant', usersRestaurantRoute);
 app.use('/restaurant', restaurantRoute);
 app.use('/menus', menusRoute);
+app.use('/dishes', dishesRoute);
 app.post('/verifyToken/restaurant', verifyToken);
 app.post('/verifyToken/user', verifyTokenUser);
 // app.use('/commands', commandsRoute);
