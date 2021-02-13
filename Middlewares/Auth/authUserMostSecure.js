@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.TOKEN);
 
     if (req.params.idUser == decodedToken.idUser) {
-      Users.findOne({ _id: req.params.idUser })
+      Users.findOne({ idUser: req.params.idUser })
         .then(user => {
           if (user) {
             next();

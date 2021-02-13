@@ -7,14 +7,14 @@ module.exports = (req, res, next) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, process.env.TOKEN);
-    UsersRestaurant.findOne({ _id: decodedToken.idUserRestaurant })
+    UsersRestaurant.findOne({ idUserRestaurant: decodedToken.idUserRestaurant })
       .then(user => {
         if (!user) {
           res.status(404).json({ invalidToken: true });
         } else {
           if (decodedToken.idRestaurant == user.idRestaurant && (user.level >= 3 && user.level !== 4)) {
             if (req.params.idUserResto) {
-              UsersRestaurant.findOne({ _id: req.params.idUserResto })
+              UsersRestaurant.findOne({ idUserRestaurant: req.params.idUserResto })
                 .then(user2 => {
                   user2.idRestaurant == decodedToken.idRestaurant ? next() : res.status(400).json({ invalidToken: true });
                 })

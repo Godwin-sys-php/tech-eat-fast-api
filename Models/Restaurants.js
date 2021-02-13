@@ -1,19 +1,82 @@
-const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
+const db = require('../Utils/db');
+const _ = require('underscore');
 
-const restaurantSchema = mongoose.Schema({
-  name: { type: String, required: true, unique: true },
-  website: { type: String },
-  address: { type: String, required: true, unique: true },
-  logoUrl: { type: String, required: true },
-  description: { type: String, required: true },
+class Restaurants {
+  insertOne(toInsert) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "INSERT INTO restaurants SET ?", toInsert,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-  creationDate: { type: Date, required: true },
-  
-  paymentMethodAccept: { type: [String], required: true }, // Possiblilité: CB, m-pesa, airtel-money, orange-money
-  acceptCash: { type: Boolean, default: true }
-});
+  findOne(params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM restaurants WHERE ?", params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          if (results.length < 1 || _.isNull(results) || _.isUndefined(results)) {
+            resolve(null);
+          } else {
+            resolve(results[0]);
+          }
+        }
+      );
+    });
+  }
 
-restaurantSchema.plugin(uniqueValidator);
+  findAll() {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM restaurants",
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-module.exports = mongoose.model('Restaurants', restaurantSchema, 'Restaurants'); 
+  updateOne(toSet, params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "UPDATE restaurants SET ? WHERE ?", [toSet, params],
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
+
+  delete(params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "DELETE FROM restaurants WHERE ?", params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
+
+  customQuery(query, params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        query, params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
+}
+
+module.exports = new Restaurants();

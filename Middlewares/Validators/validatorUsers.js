@@ -17,10 +17,10 @@ module.exports = (req, res, next) => {
     if (req.method == 'PUT') {
       if (req.body.password) {
         if (schema.validate(req.body.password) && (req.body.name.length >= 2 && req.body.name.length < 30 && _.isString(req.body.name)) && (req.body.pseudo.length >= 2 && req.body.pseudo.length < 30 && _.isString(req.body.pseudo)) && validator.isEmail(req.body.email) && (_.isArray(req.body.address) && _.isArray(req.body.phoneNumber) && verifyArrayPhoneNumbers(req.body.phoneNumber))) {
-          User.findOne({ $or: [{ email: req.body.email }, { pseudo: req.body.pseudo }], _id: { $ne: req.params.idUser } })
+          User.customQuery('SELECT * FROM users WHERE email= ? OR pseudo= ? AND idUser != ?', [req.body.email, req.body.pseudo, req.params.idUser])
             .then(user => {
-              if (user) {
-                user.email == req.body.email ? res.status(400).json({ existEmail: true }) : res.status(400).json({ existPseudo: true });
+              if (user.length > 0) {
+                user[0].email == req.body.email ? res.status(400).json({ existEmail: true }) : res.status(400).json({ existPseudo: true });
               } else {
                 next();
               }
@@ -33,10 +33,10 @@ module.exports = (req, res, next) => {
         }
       } else {
         if ((req.body.name.length >= 2 && req.body.name.length < 30 && _.isString(req.body.name)) && (req.body.pseudo.length >= 2 && req.body.pseudo.length < 30 && _.isString(req.body.pseudo)) && validator.isEmail(req.body.email) && (_.isArray(req.body.address) && _.isArray(req.body.phoneNumber) && verifyArrayPhoneNumbers(req.body.phoneNumber))) {
-          User.findOne({ $or: [{ email: req.body.email }, { pseudo: req.body.pseudo }], _id: { $ne: req.params.idUser } })
+          User.customQuery('SELECT * FROM users WHERE email= ? OR pseudo= ? AND idUser != ?', [req.body.email, req.body.pseudo, req.params.idUser])
             .then(user => {
-              if (user) {
-                user.email == req.body.email ? res.status(400).json({ existEmail: true }) : res.status(400).json({ existPseudo: true });
+              if (user.length > 0) {
+                user[0].email == req.body.email ? res.status(400).json({ existEmail: true }) : res.status(400).json({ existPseudo: true });
               } else {
                 next();
               }
@@ -50,10 +50,10 @@ module.exports = (req, res, next) => {
       }
     } else {
       if (schema.validate(req.body.password) && (req.body.name.length >= 2 && req.body.name.length < 30 && _.isString(req.body.name)) && (req.body.pseudo.length >= 2 && req.body.pseudo.length < 30 && _.isString(req.body.pseudo)) && validator.isEmail(req.body.email)) {
-        User.findOne({ $or: [{ email: req.body.email }, { pseudo: req.body.pseudo }] })
+        User.customQuery('SELECT * FROM users WHERE email= ? OR pseudo= ?', [req.body.email, req.body.pseudo])
           .then(user => {
-            if (user) {
-              user.email == req.body.email ? res.status(400).json({ existEmail: true }) : res.status(400).json({ existPseudo: true });
+            if (user.length > 0) {
+              user[0].email == req.body.email ? res.status(400).json({ existEmail: true }) : res.status(400).json({ existPseudo: true });
             } else {
               next();
             }

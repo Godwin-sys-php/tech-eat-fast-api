@@ -1,7 +1,7 @@
 const Users = require("../../Models/Users");
 
 module.exports = (req, res, next) => {
-  Users.findOne({ _id: req.params.idUser })
+  Users.findOne({ idUser: req.params.idUser })
     .then(user => {
       if (user) {
         next();

@@ -20,13 +20,6 @@ const _ = require('underscore');
 require('dotenv').config();
 
 // Connexion à mongoDB
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-mongoose.set('useUnifiedTopology', true);
-mongoose.connect(process.env.DATABASE_STRING_CONNECTION)
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch((error) => console.log('Connexion à MongoDB échouée !'));
 
 const app = express();
 

@@ -1,11 +1,11 @@
 const db = require('../Utils/db');
 const _ = require('underscore');
 
-class UsersRestaurant {
+class CommandItems {
   insertOne(toInsert) {
     return new Promise((resolve, reject) => {
       db.query(
-        "INSERT INTO usersRestaurant SET ?", toInsert,
+        "INSERT INTO commandItems SET ?", toInsert,
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
@@ -17,7 +17,7 @@ class UsersRestaurant {
   findOne(params) {
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT * FROM usersRestaurant WHERE ?", params,
+        "SELECT * FROM commandItems WHERE ?", params,
         (error, results, fields) => {
           if (error) reject(error);
           if (results.length < 1 || _.isNull(results) || _.isUndefined(results)) {
@@ -33,7 +33,7 @@ class UsersRestaurant {
   findAll() {
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT * FROM usersRestaurant",
+        "SELECT * FROM commandItems",
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
@@ -45,7 +45,7 @@ class UsersRestaurant {
   updateOne(toSet, params) {
     return new Promise((resolve, reject) => {
       db.query(
-        "UPDATE usersRestaurant SET ? WHERE ?", [toSet, params],
+        "UPDATE commandItems SET ? WHERE ?", [toSet, params],
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
@@ -57,7 +57,7 @@ class UsersRestaurant {
   delete(params) {
     return new Promise((resolve, reject) => {
       db.query(
-        "DELETE FROM usersRestaurant WHERE ?", params,
+        "DELETE FROM commandItems WHERE ?", params,
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
@@ -79,4 +79,4 @@ class UsersRestaurant {
   }
 }
 
-module.exports = new UsersRestaurant();
+module.exports = new CommandItems();

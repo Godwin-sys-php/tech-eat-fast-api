@@ -1,7 +1,7 @@
 const Commands = require("../../Models/Commands");
 
 module.exports = (req, res, next) => {
-  Commands.findOne({ _id: req.params.idCommand })
+  Commands.findOne({ idCommand: req.params.idCommand })
     .then(command => {
       if (req.method == 'PUT') {
         command.canRetry ? next() : res.status(400).json({ cantRetry: true });

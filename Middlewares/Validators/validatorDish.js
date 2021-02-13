@@ -11,9 +11,9 @@ module.exports = (req, res, next) => {
         req.body.description.length >= 2 &&
         req.body.description.length < 200 &&
         _.isString(req.body.description) &&
-        (parseInt(req.body.price) >= 1000 && _.isNumber(parseInt(req.body.price)))
+        (parseInt(req.body.price) >= 1000 && _.isNumber(parseInt(req.body.price)) && Number.isInteger(Number(req.body.price)))
       ) {
-        Menus.findOne({ _id: req.body.idMenu })
+        Menus.findOne({ idMenu: req.body.idMenu })
           .then(menu => {
             menu ? next() : res.status(400).json({ invalidForm: true });
           })
@@ -31,7 +31,7 @@ module.exports = (req, res, next) => {
         req.body.description.length >= 2 &&
         req.body.description.length < 200 &&
         _.isString(req.body.description) &&
-        (parseInt(req.body.price) >= 1000 && _.isNumber(parseInt(req.body.price)))
+        (parseInt(req.body.price) >= 1000 && _.isNumber(parseInt(req.body.price)) && Number.isInteger(Number(req.body.price)))
       ) {
         next();
       } else {

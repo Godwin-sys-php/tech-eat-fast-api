@@ -1,18 +1,82 @@
-const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');// Le plugin pour avoir des champs unique
+const db = require('../Utils/db');
+const _ = require('underscore');
 
-// Schema pour les utilisateurs
+class Users {
+  insertOne(toInsert) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "INSERT INTO users SET ?", toInsert,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-const userSchema = mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: false, unique: true },
-  pseudo: { type: String, required: true, unique: true },
-  creationDate: { type: Date, required: true },
-  password: { type: String, required: true, unique: true },
-  address: { type: [String] },
-  phoneNumber: { type: [String] }
-});
+  findOne(params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM users WHERE ?", params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          if (results.length < 1 || _.isNull(results) || _.isUndefined(results)) {
+            resolve(null);
+          } else {
+            resolve(results[0]);
+          }
+        }
+      );
+    });
+  }
 
-userSchema.plugin(uniqueValidator);// On ajoute le mongoose-unique-validator au Schema
+  findAll() {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM users",
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-module.exports = mongoose.model('Users', userSchema, 'Users'); 
+  updateOne(toSet, params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "UPDATE users SET ? WHERE ?", [toSet, params],
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
+
+  delete(params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "DELETE FROM users WHERE ?", params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
+
+  customQuery(query, params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        query, params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
+}
+
+module.exports = new Users();

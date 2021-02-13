@@ -1,20 +1,82 @@
-const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
+const db = require('../Utils/db');
+const _ = require('underscore');
 
+class Dishes {
+  insertOne(toInsert) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "INSERT INTO dishes SET ?", toInsert,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-const dishSchema = mongoose.Schema({
-  idRestaurant: { type: String, required: true },
-  idMenu: { type: String, required: true },
-  name: { type: String, required: true },
-  description: { type: String },
-  price: { type: Number, required: true },
-  creationDate: { type: Date, required: true },
+  findOne(params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM dishes WHERE ?", params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          if (results.length < 1 || _.isNull(results) || _.isUndefined(results)) {
+            resolve(null);
+          } else {
+            resolve(results[0]);
+          }
+        }
+      );
+    });
+  }
 
-  imageUrl: { type: String, required: false },
+  findAll() {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM dishes",
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-  available: { type: Boolean, required: true, default: true }
-});
+  updateOne(toSet, params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "UPDATE dishes SET ? WHERE ?", [toSet, params],
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-dishSchema.plugin(uniqueValidator);
+  delete(params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "DELETE FROM dishes WHERE ?", params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-module.exports = mongoose.model('Dishes', dishSchema, 'Dishes'); 
+  customQuery(query, params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        query, params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
+}
+
+module.exports = new Dishes();

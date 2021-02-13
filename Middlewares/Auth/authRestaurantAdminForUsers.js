@@ -12,13 +12,13 @@ module.exports = (req, res, next) => {
       next();
     }
     
-    UsersRestaurant.findOne({ _id: decodedToken.idUserRestaurant })
+    UsersRestaurant.findOne({ idUserRestaurant: decodedToken.idUserRestaurant })
       .then(user => {
         if (!user) {
           res.status(404).json({ invalidToken: true });
         } else {
           if (decodedToken.idRestaurant == user.idRestaurant && (user.level >= 3 && user.level !== 4)) {
-            UsersRestaurant.findOne({ _id: req.params.idUserResto })
+            UsersRestaurant.findOne({ idUserRestaurant: req.params.idUserResto })
               .then(user => {
                 user.idRestaurant == decodedToken.idRestaurant ? next() : res.status(400).json({ invalidToken: true });
               })

@@ -4,7 +4,7 @@ const parse = require('../../Helpers/parseHoursOurMinute');
 const Restaurants = require("../../Models/Restaurants");
 
 module.exports = (req, res, next) => {
-  Restaurants.findOne({ _id: req.params.idRestaurant })
+  Restaurants.findOne({ idRestaurant: req.params.idRestaurant })
     .then(resto => {
       const now = moment();
       let dayOfResto = getArrayOfDay(resto.daysDelivery);

@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const UsersRestaurant = require('../Models/UsersRestaurant');
+const moment = require('moment');
 
 require('dotenv').config();
 
@@ -16,9 +17,9 @@ exports.login = (req, res) => {
               res.status(401).json({ email: true, password: false });
             } else {
               res.status(200).json({
-                idUser: user._id,
+                idUser: user.idUserRestaurant,
                 idRestaurant: user.idRestaurant,
-                token: jwt.sign({ idUserRestaurant: user._id, idRestaurant: user.idRestaurant }, process.env.TOKEN, {
+                token: jwt.sign({ idUserRestaurant: user.idUserRestaurant, idRestaurant: user.idRestaurant }, process.env.TOKEN, {
                   expiresIn: "2d",
                 })
               });
@@ -38,17 +39,17 @@ exports.login = (req, res) => {
 exports.addOneUser = (req, res) => {
   bcrypt.hash(req.body.password, 10)
     .then((hash) => {
-      const now = new Date();
-      const userToInsert = new UsersRestaurant({
+      const now = moment();
+      const toInsert = {
         idRestaurant: req.params.idRestaurant,
         name: req.body.name,
         email: req.body.email,
-        creationDate: now.toUTCString(),
+        creationDate: now.unix(),
         level: req.body.level,
         pdpUrl: `${req.protocol}://${req.get('host')}/PDP_Resto/default.jpg`,
         password: hash
-      });
-      userToInsert.save()
+      };
+      UsersRestaurant.insertOne(toInsert)
         .then(res.status(201).json({ create: true }))
         .catch(error => {
           res.status(500).json({ error: true, errorMessage: error });
@@ -70,7 +71,7 @@ exports.updateOneUser = (req, res) => {
           password: hash,
           level: req.body.level,
         };
-        UsersRestaurant.updateOne({ _id: req.params.idUserResto }, toSet)
+        UsersRestaurant.updateOne(toSet, { idUserRestaurant: req.params.idUserResto })
           .then(() => {
             res.status(200).json({ update: true });
           })
@@ -87,7 +88,7 @@ exports.updateOneUser = (req, res) => {
       email: req.body.email,
       level: req.body.level,
     };
-    UsersRestaurant.updateOne({ _id: req.params.idUserResto }, toSet)
+    UsersRestaurant.updateOne(toSet, { idUserRestaurant: req.params.idUserResto })
       .then(() => {
         res.status(200).json({ update: true });
       })
@@ -98,9 +99,9 @@ exports.updateOneUser = (req, res) => {
 };
 
 exports.getOneUser = (req, res) => {
-  UsersRestaurant.findOne({ _id: req.params.idUserResto }, { password: 0 })
+  UsersRestaurant.findOne({ idUserRestaurant: req.params.idUserResto })
     .then(user => {
-      res.status(200).json({ find: true, result: user });
+      res.status(200).json({ find: true, result: {...user, password: null} });
     })
     .catch(error => {
       res.status(500).json({ error: true, errorMessage: error });
@@ -108,9 +109,9 @@ exports.getOneUser = (req, res) => {
 };
 
 exports.getAllUser = (req, res) => {
-  UsersRestaurant.find({ idRestaurant: req.params.idRestaurant }, { password: 0 })
-    .then(user => {
-      res.status(200).json({ find: true, result: user });
+  UsersRestaurant.customQuery('SELECT * FROM usersRestaurant WHERE idRestaurant=?' ,[req.params.idRestaurant])
+    .then(users => {
+      res.status(200).json({ find: true, result: users });
     })
     .catch(error => {
       res.status(500).json({ error: true, errorMessage: error });
@@ -118,12 +119,12 @@ exports.getAllUser = (req, res) => {
 };
 
 exports.deleteOneUser = (req, res) => {
-  UsersRestaurant.findOne({ _id: req.params.idUserResto })
+  UsersRestaurant.findOne({ idUserRestaurant: req.params.idUserResto })
     .then(user => {
       if (user.level >= 3) {
         res.status(403).json({ cannotDeleteAdmin: true });
       } else {
-        UsersRestaurant.deleteOne({ _id: req.params.idUserResto })
+        UsersRestaurant.delete({ idUserRestaurant: req.params.idUserResto })
           .then(() => {
             res.status(200).json({ delete: true });
           })

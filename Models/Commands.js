@@ -1,41 +1,82 @@
-const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
+const db = require('../Utils/db');
+const _ = require('underscore');
 
+class Commands {
+  insertOne(toInsert) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "INSERT INTO commands SET ?", toInsert,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-const commandSchema = mongoose.Schema({
-  idRestaurant: { type: String, required: true },
-  orderId: { type: String, required: true, unique: true },
-  idDeliverer: { type: String, required: false },
-  idUser: { type: String, required: true },
-  phoneNumber: { type: Number, required: false },
-  email: { type: String, required: false },
-  comment: { type: String },
-  address: { type: String },
-  creationDate: { type: Date, required: true },
-  lastUpdate: { type: Date, required: true },
-  type: { type: String, required: true }, // toTake, toDeliver
+  findOne(params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM commands WHERE ?", params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          if (results.length < 1 || _.isNull(results) || _.isUndefined(results)) {
+            resolve(null);
+          } else {
+            resolve(results[0]);
+          }
+        }
+      );
+    });
+  }
 
-  /*
-    Structure: 
-    [
-      { idDish: l'id du plâts, price: le prix, quantity: la quantité, total: le total }
-    ]
-  */
-  item: { type: [Object], required: true },
+  findAll() {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM commands",
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-  total: { type: Number, required: true }, // Le total général
+  updateOne(toSet, params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "UPDATE commands SET ? WHERE ?", [toSet, params],
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-  paymentMethod: { type: String, required: true }, // Possiblilité: CB, m-pesa, airtel-money, orange-money, direct-cash
+  delete(params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "DELETE FROM commands WHERE ?", params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
 
-  accept: { type: String, required: true }, // Possiblilité: inLoading, true, false
+  customQuery(query, params) {
+    return new Promise((resolve, reject) => {
+      db.query(
+        query, params,
+        (error, results, fields) => {
+          if (error) reject(error);
+          resolve(results);
+        }
+      );
+    });
+  }
+}
 
-  whyRefused: { type: String, required: false }, 
-
-  canRetry: { type: Boolean, required: false }, 
-
-  status: { type: String, required: true } // Possiblilité: inLoading, inCooking, outRestaurant, ready
-});
-
-commandSchema.plugin(uniqueValidator);
-
-module.exports = mongoose.model('Commands', commandSchema, 'Commands'); 
+module.exports = new Commands();

@@ -2,10 +2,10 @@ const Deliverer = require('../../Models/Deliverer');
 const Resto = require('../../Models/Restaurants');
 
 module.exports = (req, res, next) => {
-  Deliverer.findOne({ _id: req.params.idCommand })
+  Deliverer.findOne({ idDeliverer: req.params.idCommand })
     .then(deliverer => {
       if (deliverer) {
-        Resto.findOne({ _id: deliverer.idRestaurant })
+        Resto.findOne({ idRestaurant: deliverer.idRestaurant })
           .then(resto => {
             if (resto) {
               next();

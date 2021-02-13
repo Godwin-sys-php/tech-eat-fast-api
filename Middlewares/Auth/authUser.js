@@ -12,7 +12,7 @@ module.exports = (req, res, next) => {
     if (idUser && idUser !== decodedToken.idUser) { // Si il y a un userId et il est différent de celui qui est dans le JWT
       res.status(403).json({ invalidToken: true });
     } else { // Sinon: 
-      Users.findOne({ _id: decodedToken.idUser }) // On vérifie si le userId existe bien en base de donnée
+      Users.findOne({ idUser: decodedToken.idUser }) // On vérifie si le userId existe bien en base de donnée
         .then(user => {
           if (!user) {// Si il n'existe pas
             res.status(403).json({ invalidToken: true });

@@ -1,15 +1,16 @@
 const Menus = require("../Models/Menus");
 const Dishes = require("../Models/Dishes");
+const moment = require('moment');
 
 exports.addMenu = (req, res) => {
-  const now = new Date();
-  const toInsert = new Menus({
+  const now = moment();
+  const toInsert = {
     idRestaurant: req.params.idRestaurant,
     name: req.body.name,
-    creationDate: now.toUTCString()
-  });
+    creationDate: now.unix()
+  };
 
-  toInsert.save()
+  Menus.insertOne(toInsert)
     .then(() => {
       res.status(201).json({ create: true })
     })
@@ -23,7 +24,7 @@ exports.updateMenu = (req, res) => {
     name: req.body.name,
   };
 
-  Menus.updateOne({ _id: req.params.idMenu }, toSet)
+  Menus.updateOne(toSet, { idMenu: req.params.idMenu })
     .then(() => {
       res.status(200).json({ update: true });
     })
@@ -33,7 +34,7 @@ exports.updateMenu = (req, res) => {
 };
 
 exports.getMenuOfResto = (req, res) => {
-  Menus.find({ idRestaurant: req.params.idRestaurant })
+  Menus.customQuery('SELECT * FROM menus WHERE idRestaurant = ?', [req.params.idRestaurant])
     .then(menus => {
       res.status(200).json({ find: true, result: menus });
     })
@@ -43,7 +44,7 @@ exports.getMenuOfResto = (req, res) => {
 }
 
 exports.getOneMenu = (req, res) => {
-  Menus.findOne({ _id: req.params.idMenu })
+  Menus.findOne({ idMenu: req.params.idMenu })
     .then(menu => {
       res.status(200).json({ find: true, result: menu });
     })
@@ -53,14 +54,14 @@ exports.getOneMenu = (req, res) => {
 };
 
 exports.deleteOneMenu = (req, res) => {
-  Menus.find() 
+  Menus.findAll() 
     .then(menus => {
       if (menus.length <= 1) {
         res.status(400).json({ cantHaveZeroMenu: true });
       } else {
-        Dishes.deleteMany({ idMenu: req.params.idMenu })
+        Dishes.delete({ idMenu: req.params.idMenu })
           .then(() => {
-            Menus.deleteOne({ _id: req.params.idMenu })
+            Menus.delete({ idMenu: req.params.idMenu })
               .then(() => {
                 res.status(200).json({ delete: true });
               })

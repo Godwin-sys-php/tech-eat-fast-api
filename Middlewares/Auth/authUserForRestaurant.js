@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.TOKEN);
 
     if (decodedToken.idUser && decodedToken.idUser == idUser) {
-      Users.findOne({ _id: req.params.idUser })
+      Users.findOne({ idUser: req.params.idUser })
         .then(user => {
           if (user) {
             next();
@@ -25,9 +25,9 @@ module.exports = (req, res, next) => {
           res.status(500).json({ error: true, errorMessage: error });
         });
     } else if (decodedToken.idUserRestaurant) {
-      UsersRestaurant.findOne({ _id: decodedToken.idUserRestaurant })
+      UsersRestaurant.findOne({ idUserRestaurant: decodedToken.idUserRestaurant })
         .then(userRestaurant => {
-          Restaurants.findOne({ _id: userRestaurant.idRestaurant })
+          Restaurants.findOne({ idRestaurant: userRestaurant.idRestaurant })
             .then(restaurant => {
               if (restaurant) {
                 next();

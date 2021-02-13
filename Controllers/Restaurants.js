@@ -12,12 +12,12 @@ exports.updateRestaurant = (req, res) => {
       logoUrl: `${req.protocol}://${req.get('host')}/Images-Resto/${req.file.filename}`,
     };
 
-    Restaurants.findOne({ _id: req.params.idRestaurant })
+    Restaurants.findOne({ idRestaurant: req.params.idRestaurant })
       .then(resto => {
         const filename = resto.logoUrl.split("/Images-Resto/")[1];
         filename !== "default.jpg" ? fs.unlinkSync(`Images-Resto/${filename}`) : () => { };
 
-        Restaurants.updateOne({ _id: req.params.idRestaurant }, toSet)
+        Restaurants.updateOne(toSet, { idRestaurant: req.params.idRestaurant })
           .then(() => {
             res.status(200).json({ update: true });
           })
@@ -36,7 +36,7 @@ exports.updateRestaurant = (req, res) => {
       description: req.body.description,
       acceptCash: req.body.acceptCash,
     };
-    Restaurants.updateOne({ _id: req.params.idRestaurant }, toSet)
+    Restaurants.updateOne(toSet, { idRestaurant: req.params.idRestaurant })
       .then(() => {
         res.status(200).json({ update: true });
       })
@@ -46,18 +46,22 @@ exports.updateRestaurant = (req, res) => {
   }
 };
 
-exports.getOneRestaurant = (req, res) => {
-  Restaurants.findOne({ _id: req.params.idRestaurant })
-    .then(resto => {
-      res.status(200).json({ find: true, result: resto })
-    })
-    .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
-    });
+exports.getOneRestaurant = async (req, res) => {
+  try {
+    const resto = await Restaurants.findOne({ idRestaurant: req.params.idRestaurant });
+    const pm = await Restaurants.customQuery('SELECT pm.name FROM PaymentMethodRestaurant pm WHERE pm.idRestaurant = ?', [req.params.idRestaurant]);
+    
+    const finalPm = pm.map((obj) => obj.name );
+
+    res.status(200).json({ find: true, result: {...resto, paymentMethodAccept: finalPm} })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, errorMessage: error });
+  }
 };
 
 exports.getAllRestaurant = (req, res) => {
-  Restaurants.find()
+  Restaurants.findAll()
     .then(resto => {
       res.status(200).json({ find: true, result: resto })
     })

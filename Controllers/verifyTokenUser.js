@@ -13,7 +13,7 @@ module.exports = (req, res) => {
         res.status(400).json({ invalidToken: true });
       } else {
         if (idUser == decoded.idUserRestaurant) {
-          Users.findOne({ _id: decoded.idUserRestaurant })
+          Users.findOne({ idUser: decoded.idUserRestaurant })
             .then(user => {
               user ? res.status(200).json({ validToken: true }) : res.status(400).json({ invalidToken: true });
             })

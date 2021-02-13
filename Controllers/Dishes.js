@@ -1,21 +1,22 @@
 const Dishes = require("../Models/Dishes");
+const moment = require('moment');
 const fs = require('fs');
 
 exports.addDish = async (req, res) => {
-  const now = new Date();
+  const now = moment();
 
-  const toInsert = new Dishes({
+  const toInsert = {
     idRestaurant: req.idRestaurant,
     idMenu: req.params.idMenu,
     name: req.body.name,
     description: req.body.description,
     price: parseInt(req.body.price),
-    creationDate: now.toUTCString(),
+    creationDate: now.unix(),
     imageUrl: `${req.protocol}://${req.get('host')}/Images-Dishes/${req.file.filename}`,
     available: true
-  });
+  };
 
-  await toInsert.save()
+  await Dishes.insertOne(toInsert)
     .then(() => {
       res.status(201).json({ create: true })
     })
@@ -36,12 +37,12 @@ exports.updateDish = (req, res) => {
       }`,
     };
 
-    Dishes.findOne({ _id: req.params.idDish })
+    Dishes.findOne({ idDish: req.params.idDish })
       .then((dish) => {
         const filename = dish.imageUrl.split("/Images-Dishes/")[1];
         fs.unlinkSync(`Images-Dishes/${filename}`);
 
-        Dishes.updateOne({ _id: req.params.idDish }, toSet)
+        Dishes.updateOne(toSet, req.params.idDish)
           .then(() => {
             res.status(200).json({ update: true });
           })
@@ -59,7 +60,7 @@ exports.updateDish = (req, res) => {
       description: req.body.description,
       price: req.body.price,
     };
-    Dishes.updateOne({ _id: req.params.idDish }, toSet)
+    Dishes.updateOne(toSet, req.params.idDish)
       .then(() => {
         res.status(200).json({ update: true });
       })
@@ -70,9 +71,9 @@ exports.updateDish = (req, res) => {
 };
 
 exports.toogleDish = (req, res) => {
-  Dishes.findOne({ _id: req.params.idDish })
+  Dishes.findOne({ idDish: req.params.idDish })
     .then(dish => {
-      Dishes.updateOne({ _id: req.params.idDish }, { available: !dish.available })
+      Dishes.updateOne({ available: !dish.available },req.params.idDish)
         .then(() => {
           res.status(200).json({ update: true });
         })
@@ -86,7 +87,7 @@ exports.toogleDish = (req, res) => {
 };
 
 exports.getFromMenu = (req, res) => {
-  Dishes.find({ idMenu: req.params.idMenu })
+  Dishes.customQuery('SELECT * FROM dishes WHERE idMenu = ?', [req.params.idMenu])
     .then(dishes => {
       res.status(200).json({ find: true, result: dishes });
     })
@@ -96,7 +97,7 @@ exports.getFromMenu = (req, res) => {
 };
 
 exports.getFromRestaurant = (req, res) => {
-  Dishes.find({ idRestaurant: req.params.idRestaurant })
+  Dishes.customQuery('SELECT * FROM dishes WHERE idRestaurant = ?', [req.params.idRestaurant])
     .then(dishes => {
       res.status(200).json({ find: true, result: dishes });
     })
@@ -106,7 +107,7 @@ exports.getFromRestaurant = (req, res) => {
 }
 
 exports.getOneDish = (req, res) => {
-  Dishes.find({ _id: req.params.idDish })
+  Dishes.findOne({ idDish: req.params.idDish })
     .then(dish => {
       res.status(200).json({ find: true, result: dish });
     })
@@ -124,12 +125,12 @@ exports.getMostPopular = (req, res) => {
 };
 
 exports.deleteOneDish = (req, res) => {
-  Dishes.findOne({ _id: req.params.idDish })
+  Dishes.findOne({ idDish: req.params.idDish })
     .then(dish => {
       const filename = dish.imageUrl.split("/Images-Dishes/")[1];
       fs.unlinkSync(`Images-Dishes/${filename}`);
       
-      Dishes.deleteOne({ _id: req.params.idDish })
+      Dishes.delete({ idDish: req.params.idDish })
         .then(() => {
           res.status(200).json({ delete: true });
         })

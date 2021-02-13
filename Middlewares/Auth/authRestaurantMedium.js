@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, process.env.TOKEN);
-    UsersRestaurant.findOne({ _id: decodedToken.idUserRestaurant })
+    UsersRestaurant.findOne({ idUserRestaurant: decodedToken.idUserRestaurant })
       .then(user => {
         if (!user) {
           res.status(404).json({ invalidToken: true });
@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
           if (decodedToken.idRestaurant == user.idRestaurant && (user.level >= 2 && user.level !== 4)) {
             req.idRestaurant = user.idRestaurant;
             if (req.params.idMenu) {
-              Menus.findOne({ _id: req.params.idMenu })
+              Menus.findOne({ idMenu: req.params.idMenu })
                 .then(menu => {
                   menu.idRestaurant == decodedToken.idRestaurant ? next() : res.status(403).json({ invalidToken: true });
                 })
@@ -27,7 +27,7 @@ module.exports = (req, res, next) => {
             } else if (req.params.idRestaurant) {
               req.params.idRestaurant == decodedToken.idRestaurant ? next() : res.status(403).json({ invalidToken: true });
             } else if (req.params.idDish) {
-              Dishes.findOne({ _id: req.params.idDish })
+              Dishes.findOne({ idDish: req.params.idDish })
                 .then(dish => {
                   dish.idRestaurant == decodedToken.idRestaurant ? next() : res.status(403).json({ invalidToken: true });
                 })

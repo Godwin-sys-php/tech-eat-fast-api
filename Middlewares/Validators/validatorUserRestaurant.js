@@ -21,12 +21,12 @@ module.exports = (req, res, next) => {
     if (req.method == 'PUT') {
       if (req.body.password) {
         if (condition) {
-          UserResto.findOne({ email: req.body.email, _id: { $ne: req.params.idUserResto } })
+          UserResto.customQuery('SELECT * FROM usersRestaurant WHERE email = ? AND idUserRestaurant != ?', [req.body.email, req.params.idUserResto])
             .then(user => {
-              if (!user) {
-                UserResto.find({ idRestaurant: req.idRestaurant, level: 3 })
+              if (user.length < 1) {
+                UserResto.customQuery('SELECT * FROM usersRestaurant WHERE idRestaurant= ? AND level= 3', [req.idRestaurant])
                   .then(users => {
-                    if (users.length == 1 && users[0]._id == req.params.idUserResto && req.body.level < 3) {
+                    if (users.length == 1 && users[0].idUserRestaurant == req.params.idUserResto && req.body.level < 3) {
                       res.status(400).json({ cantChangeLevelOfLastAdmin: true });
                     } else {
                       next();
@@ -47,12 +47,12 @@ module.exports = (req, res, next) => {
         }
       } else {
         if (condition2) {
-          UserResto.findOne({ email: req.body.email, _id: { $ne: req.params.idUserResto } })
+          UserResto.customQuery('SELECT * FROM usersRestaurant WHERE email = ? AND idUserRestaurant != ?', [req.body.email, req.params.idUserResto])
             .then(user => {
-              if (!user) {
-                UserResto.find({ idRestaurant: req.idRestaurant, level: 3 })
+              if (user.length < 1) {
+                UserResto.customQuery('SELECT * FROM usersRestaurant WHERE idRestaurant= ? AND level= 3', [req.idRestaurant])
                   .then(users => {
-                    if (users.length == 1 && users[0]._id == req.params.idUserResto && req.body.level < 3) {
+                    if (users.length == 1 && users[0].idUserRestaurant == req.params.idUserResto && req.body.level < 3) {
                       res.status(400).json({ cantChangeLevelOfLastAdmin: true });
                     } else {
                       next();

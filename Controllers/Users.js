@@ -2,21 +2,22 @@ const Users = require('../Models/Users');
 const Commands = require('../Models/Commands');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const moment = require('moment');
 
 require('dotenv').config();
 
 exports.signup = (req, res) => {
   bcrypt.hash(req.body.password, 10)
     .then((hash) => {
-      const now = new Date();
-      const userToInsert = new Users({
+      const now = moment();
+      const toInsert = {
         name: req.body.name,
         email: req.body.email,
         pseudo: req.body.pseudo,
-        creationDate: now.toUTCString(),
+        creationDate: now.unix(),
         password: hash
-      });
-      userToInsert.save()
+      };
+      Users.insertOne(toInsert)
         .then(res.status(201).json({ create: true }))
         .catch(error => {
           res.status(500).json({ error: true, errorMessage: error });
@@ -28,19 +29,19 @@ exports.signup = (req, res) => {
 };
 
 exports.login = (req, res) => {
-  Users.findOne({ $or: [{ email: req.body.identifiant }, { pseudo: req.body.identifiant }] })
+  Users.customQuery('SELECT * FROM users WHERE email=? OR pseudo=?', [req.body.identifiant, req.body.identifiant])
     .then((user) => {
-      if (!user) {
+      if (user.length < 1) {
         res.status(404).json({ identifiant: false, password: false });
       } else {
-        bcrypt.compare(req.body.password, user.password)
+        bcrypt.compare(req.body.password, user[0].password)
           .then((valid) => {
             if (!valid) {
               res.status(401).json({ identifiant: true, password: false });
             } else {
               res.status(200).json({
-                idUser: user._id,
-                token: jwt.sign({ idUser: user._id }, process.env.TOKEN, {
+                idUser: user[0].idUser,
+                token: jwt.sign({ idUser: user[0].idUser }, process.env.TOKEN, {
                   expiresIn: "168h",
                 })
               });
@@ -57,18 +58,18 @@ exports.login = (req, res) => {
 };
 
 exports.loginNoJwt = (req, res) => {
-  Users.findOne({ $or: [{ email: req.body.identifiant }, { pseudo: req.body.identifiant }] })
+  Users.customQuery('SELECT * FROM users WHERE email=? OR pseudo=?', [req.body.identifiant, req.body.identifiant])
     .then((user) => {
-      if (!user) {
+      if (user.length < 1) {
         res.status(404).json({ identifiant: false, password: false });
       } else {
-        bcrypt.compare(req.body.password, user.password)
+        bcrypt.compare(req.body.password, user[0].password)
           .then((valid) => {
             if (!valid) {
               res.status(401).json({ identifiant: true, password: false });
             } else {
               res.status(200).json({
-                idUser: user._id
+                idUser: user[0].idUser,
               });
             }
           })
@@ -95,7 +96,7 @@ exports.updateOneUser = (req, res) => {
           address: req.body.address,
           phoneNumber: req.body.phoneNumber
         };
-        Users.updateOne({ _id: req.params.idUser }, toSet)
+        Users.updateOne(toSet, { idUser: req.params.idUser })
           .then(() => {
             res.status(200).json({ update: true });
           })
@@ -114,7 +115,7 @@ exports.updateOneUser = (req, res) => {
       address: req.body.address,
       phoneNumber: req.body.phoneNumber
     };
-    Users.updateOne({ _id: req.params.idUser }, toSet)
+    Users.updateOne(toSet, { idUser: req.params.idUser })
       .then(() => {
         res.status(200).json({ update: true });
       })
@@ -125,9 +126,9 @@ exports.updateOneUser = (req, res) => {
 };
 
 exports.getOneUser = (req, res) => {
-  Users.findOne({ _id: req.params.idUser }, { password: 0 })
+  Users.findOne({ idUser: req.params.idUser })
     .then(user => {
-      res.status(200).json({ find: true, result: user });
+      res.status(200).json({ find: true, result: {...user, password: null} });
     })
     .catch(error => {
       res.status(500).json({ error: true, errorMessage: error });
@@ -145,7 +146,7 @@ exports.getAllCommand = (req, res) => {
 };
 
 exports.deleteOneUser = (req, res) => {
-  Users.deleteOne({ _id: req.params.idUser })
+  Users.delete({ idUser: req.params.idUser })
     .then(() => {
       res.status(200).json({ delete: true });
     })
