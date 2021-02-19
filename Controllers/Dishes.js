@@ -42,7 +42,7 @@ exports.updateDish = (req, res) => {
         const filename = dish.imageUrl.split("/Images-Dishes/")[1];
         fs.unlinkSync(`Images-Dishes/${filename}`);
 
-        Dishes.updateOne(toSet, req.params.idDish)
+        Dishes.updateOne(toSet, { idDish: req.params.idDish })
           .then(() => {
             res.status(200).json({ update: true });
           })
@@ -60,7 +60,7 @@ exports.updateDish = (req, res) => {
       description: req.body.description,
       price: req.body.price,
     };
-    Dishes.updateOne(toSet, req.params.idDish)
+    Dishes.updateOne(toSet, { idDish: req.params.idDish })
       .then(() => {
         res.status(200).json({ update: true });
       })
