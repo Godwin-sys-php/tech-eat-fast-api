@@ -3,9 +3,16 @@ const router = require('express').Router();
 const limits = require('../Middlewares/Limits/limits');
 
 const authUserMostSecure = require('../Middlewares/Auth/authUserMostSecure');
+
 const validatorUsers = require('../Middlewares/Validators/validatorUsers');
+const validatorPhoneNumber = require('../Middlewares/Validators/validatorPhoneNumber');
+const validatorAddress = require('../Middlewares/Validators/validatorAddress');
+
 const authUserForRestaurant = require('../Middlewares/Auth/authUserForRestaurant');
+
 const existUser = require('../Middlewares/Exists/existUser');
+const existAddress = require('../Middlewares/Exists/existAddress');
+const existPhoneNumber = require('../Middlewares/Exists/existPhoneNumber');
 
 const userCtrl = require('../Controllers/Users');
 const verifyTokenUser = require('../Controllers/verifyTokenUser');
@@ -14,12 +21,22 @@ router.post('/signup', limits(20, 15), validatorUsers, userCtrl.signup) ; // Ins
 router.post('/login', limits(10, 15), userCtrl.login); // Connecte un utilisateur
 router.post('/login-no-jwt', limits(10, 15), userCtrl.loginNoJwt); // Connecte un utilisateur sans lui donner un jwt
 router.post('/verify-jwt', limits(10, 15), verifyTokenUser); // Connecte un utilisateur sans lui donner un jwt
+router.post('/:idUser/address', limits(40, 15), existUser, authUserMostSecure, validatorAddress, userCtrl.addAddress); // Ajoute une addresse à un utilisateur
+router.post('/:idUser/phoneNumber', limits(40, 15), existUser, authUserMostSecure, validatorPhoneNumber, userCtrl.addPhoneNumber); // Ajoute un numéro à un utilisateur
 
-router.put('/:idUser', limits(30, 15), existUser, authUserMostSecure, validatorUsers, userCtrl.updateOneUser); // Modifie un utilisateur
+router.put('/:idUser', limits(100, 15), existUser, authUserMostSecure, validatorUsers, userCtrl.updateOneUser); // Modifie un utilisateur
+router.put('/:idUser/address/:idAddress', limits(100, 15), existUser, existAddress, authUserMostSecure, validatorAddress, userCtrl.updateAddress); // Modifie une addresse d'un utilisateur
+router.put('/:idUser/phoneNumber/:idPhoneNumber', limits(40, 15), existUser, existPhoneNumber, authUserMostSecure, validatorPhoneNumber, userCtrl.updatePhoneNumber); // Modifie un numéro d'un utilisateur
 
-router.get('/:idUser', limits(50, 15), existUser, authUserForRestaurant, userCtrl.getOneUser); // Récupère un utilisateur par lui même ou le restaurant
-router.get('/:idUser/commands', limits(50, 15), existUser, authUserMostSecure, userCtrl.getAllCommand); // Récupère les commandes d'un utilisateur
+router.get('/:idUser', limits(100, 15), existUser, authUserForRestaurant, userCtrl.getOneUser); // Récupère un utilisateur par lui même ou le restaurant
+router.get('/:idUser/commands', limits(100, 15), existUser, authUserMostSecure, userCtrl.getAllCommand); // Récupère les commandes d'un utilisateur
+router.get('/:idUser/address', limits(40, 15), existUser, authUserMostSecure, userCtrl.getAllAddress); // Récupère toutes les addresses d'un utilisateur
+router.get('/:idUser/address/:idAddress', limits(40, 15), existUser, existAddress, authUserMostSecure, userCtrl.getOneAddress); // Récupère une addresses d'un utilisateur
+router.get('/:idUser/phoneNumber', limits(40, 15), existUser, authUserMostSecure, userCtrl.getAllPhoneNumber); // Récupère tout les numéros d'un utilisateur
+router.get('/:idUser/phoneNumber/:idPhoneNumber', limits(40, 15), existUser, existPhoneNumber, authUserMostSecure, userCtrl.getOnePhoneNumber); // Récupère un numéros d'un utilisateur
 
 router.delete('/:idUser', limits(50, 15), existUser, authUserMostSecure, userCtrl.deleteOneUser); // Supprime un utilisateur
+router.delete('/:idUser/address/:idAddress', limits(100, 15), existUser, existAddress, authUserMostSecure, userCtrl.deleteOneAddress); // Supprime une addresse d'un utilisateur
+router.delete('/:idUser/phoneNumber/:idPhoneNumber', limits(40, 15), existUser, existPhoneNumber, authUserMostSecure, userCtrl.deleteOnePhoneNumber); // Supprime un numéro d'un utilisateur
 
 module.exports = router;
