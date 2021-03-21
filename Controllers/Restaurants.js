@@ -83,6 +83,17 @@ exports.getOneRestaurantWithMenus = async (req, res) => {
       newMenus.push({ ...menus[index], dishes: until });
     }
 
+    if (newMenus.length > 0) {
+      for (let index in newMenus) {
+        if (newMenus[index].dishes.length > 0) {
+          for (let i in newMenus[index].dishes) {
+            let options = await Dishes.customQuery('SELECT idDishOption, name, price FROM dishOptions WHERE idDish= ?', [newMenus[index].dishes[i].idDish]);
+            newMenus[index].dishes[i] = {...newMenus[index].dishes[i], options: options};
+          }
+        }
+      }
+    }
+
     res.status(200).json({ find: true, result: {restoInfo: restoInfo, menus: newMenus} });
   } catch (error) {
     res.status(500).json({ error: true, errorMessage: error });

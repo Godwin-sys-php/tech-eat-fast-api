@@ -110,7 +110,7 @@ exports.addAddress = (req, res) => {
 exports.addPhoneNumber = (req, res) => {
   const toInsert = {
     idUser: req.params.idUser,
-    phoneNumber: Number(req.body.phoneNumber),
+    phoneNumber: (req.body.phoneNumber),
   };
 
   Users.customQuery("INSERT INTO usersPhoneNumber SET ?", [toInsert])

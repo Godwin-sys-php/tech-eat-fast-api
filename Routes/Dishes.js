@@ -6,6 +6,7 @@ const existMenu = require('../Middlewares/Exists/existMenu');
 const authRestaurantMedium = require('../Middlewares/Auth/authRestaurantMedium');
 const validatorDish = require('../Middlewares/Validators/validatorDish');
 const existDish = require('../Middlewares/Exists/existDish');
+const existOption = require('../Middlewares/Exists/existOption');
 const fileUpload = require('../Middlewares/Uploads/dishesImageForUpdate');
 const fileUpload2 = require('../Middlewares/Uploads/dishesImage');
 
@@ -20,6 +21,7 @@ router.put('/:idDish/toogle', limits(80, 15), existDish, authRestaurantMedium, d
 router.get('/menus/:idMenu', limits(800, 15), existMenu, dishCtrl.getFromMenu); // Récupère tout les plats d'un menu
 router.get('/restaurant/:idRestaurant', limits(800, 15), existRestaurant, dishCtrl.getFromRestaurant); // Récupère tout les plats d'un menu
 router.get('/:idDish', limits(800, 15), existDish, dishCtrl.getOneDish); // Récupère un plats
+router.get('/options/:idOption', limits(800, 15), existOption, dishCtrl.getOneOption); // Récupère une option
 router.get('/menus/:idMenu/most-popular', limits(800, 15), existMenu, dishCtrl.getMostPopularFromMenu); // Récupère les plats les plus populaire d'un menu
 router.get('/most-popular', limits(800, 15), dishCtrl.getMostPopular); // Récupère les plats les plus populaire
 

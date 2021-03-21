@@ -1,8 +1,11 @@
 const _ = require('underscore');
+const checkArrayOptions = require('../../Helpers/checkArrayOptions');
 const Menus = require('../../Models/Menus');
 
 module.exports = (req, res, next) => {
   try {
+
+    req.body.options = JSON.parse(req.body.options);
     if (req.method == 'PUT') {
       if (
         req.body.name.length >= 2 &&
@@ -11,7 +14,8 @@ module.exports = (req, res, next) => {
         req.body.description.length >= 2 &&
         req.body.description.length < 200 &&
         _.isString(req.body.description) &&
-        (parseInt(req.body.price) >= 1000 && _.isNumber(parseInt(req.body.price)) && Number.isInteger(Number(req.body.price)))
+        (parseInt(req.body.price) >= 1000 && _.isNumber(parseInt(req.body.price)) && Number.isInteger(Number(req.body.price))) &&
+        checkArrayOptions(req.body, true, req)
       ) {
         Menus.findOne({ idMenu: req.body.idMenu })
           .then(menu => {
@@ -31,7 +35,8 @@ module.exports = (req, res, next) => {
         req.body.description.length >= 2 &&
         req.body.description.length < 200 &&
         _.isString(req.body.description) &&
-        (parseInt(req.body.price) >= 1000 && _.isNumber(parseInt(req.body.price)) && Number.isInteger(Number(req.body.price)))
+        (parseInt(req.body.price) >= 1000 && _.isNumber(parseInt(req.body.price)) && Number.isInteger(Number(req.body.price))) &&
+        checkArrayOptions(req.body, true, req)
       ) {
         next();
       } else {
