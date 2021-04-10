@@ -1,5 +1,6 @@
 const Users = require('../Models/Users');
 const Commands = require('../Models/Commands');
+const Restaurants = require('../Models/Restaurants');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
@@ -40,12 +41,12 @@ exports.login = (req, res) => {
               res.status(401).json({ identifiant: true, password: false });
             } else {
               const users = await Users.findOne({ idUser: user[0].idUser });
-              const phoneNumbers = await Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [ user[0].idUser]);
+              const phoneNumbers = await Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [user[0].idUser]);
               const address = await Users.customQuery("SELECT * FROM usersAddress WHERE idUser = ?", [user[0].idUser]);
               res.status(200).json({
-                user: {...users, phoneNumbers: phoneNumbers, address: address, password: null,},
+                user: { ...users, phoneNumbers: phoneNumbers, address: address, password: null, },
                 token: jwt.sign({ idUser: user[0].idUser }, process.env.TOKEN, {
-                  expiresIn: "168h",
+                  expiresIn: "336h",
                 })
               });
             }
@@ -192,15 +193,15 @@ exports.updatePhoneNumber = (req, res) => {
   };
 
   Users.customQuery("UPDATE usersPhoneNumber SET ? WHERE idUserPhoneNumber = ?", [toSet, req.params.idPhoneNumber])
-  .then(() => {
-    Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [req.params.idUser])
-      .then((phoneNumbers) => {
-        res.status(201).json({ update: true, phoneNumbers: phoneNumbers })
-      })
-      .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
-      });
-  })
+    .then(() => {
+      Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [req.params.idUser])
+        .then((phoneNumbers) => {
+          res.status(201).json({ update: true, phoneNumbers: phoneNumbers })
+        })
+        .catch(error => {
+          res.status(500).json({ error: true, errorMessage: error });
+        });
+    })
     .catch(error => {
       res.status(500).json({ error: true, errorMessage: error });
     });
@@ -211,22 +212,84 @@ exports.getOneUser = async (req, res) => {
     const users = await Users.findOne({ idUser: req.params.idUser });
     const phoneNumbers = await Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [req.params.idUser]);
     const address = await Users.customQuery("SELECT * FROM usersAddress WHERE idUser = ?", [req.params.idUser]);
-    
-    res.status(200).json({ find: true, result:{...users, phoneNumbers: phoneNumbers, address: address, password: null,} });
+
+    res.status(200).json({ find: true, result: { ...users, phoneNumbers: phoneNumbers, address: address, password: null, } });
   } catch (error) {
     res.status(500).json({ error: true, errorMessage: error });
   }
 };
 
-exports.getAllCommand = (req, res) => {
-  Commands.findOne({ idUser: req.params.idUser })
-    .then(commands => {
-      res.status(200).json({ find: true, result: commands });
-    })
-    .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
-    });
-};
+exports.getAllCommand = async (req, res) => {
+  try {
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idUser = ? ORDER BY idCommand DESC', [req.params.idUser]);
+    let response = [];
+
+    for (let index in commands) {
+      let el = commands[index];
+      let commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [el.idCommand]);
+      let restoInfo = await Restaurants.findOne({ idRestaurant: el.idRestaurant });
+      response.push({ ...el, items: commandItems, restoInfo: restoInfo });
+    }
+
+    res.status(200).json({ find: true, result: response });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+
+exports.getInProgressCommands = async (req, res) => {
+  try {
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idUser = ? AND status != "done" ORDER BY idCommand DESC', [req.params.idUser]);
+    let response = [];
+
+    for (let index in commands) {
+      let el = commands[index];
+      let commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [el.idCommand]);
+      let restoInfo = await Restaurants.findOne({ idRestaurant: el.idRestaurant });
+      response.push({ ...el, items: commandItems, restoInfo: restoInfo });
+    }
+
+    res.status(200).json({ find: true, result: response });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+
+exports.getInProgressCommandsNotConnected = async (req, res) => {
+  try {
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE deviceId = ? AND status != "done" ORDER BY idCommand DESC', [req.params.idUser]);
+    let response = [];
+
+    for (let index in commands) {
+      let el = commands[index];
+      let commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [el.idCommand]);
+      let restoInfo = await Restaurants.findOne({ idRestaurant: el.idRestaurant });
+      response.push({ ...el, items: commandItems, restoInfo: restoInfo });
+    }
+
+    res.status(200).json({ find: true, result: response });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+
+exports.getCommandsWithTimestamp = async (req, res) => {
+  try {
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idUser = ? AND creationDate > ? AND creationDate <= ? ORDER BY idCommand DESC', [req.params.idUser, req.params.begin, req.params.end]);
+    let response = [];
+
+    for (let index in commands) {
+      let el = commands[index];
+      let commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [el.idCommand]);
+      let restoInfo = await Restaurants.findOne({ idRestaurant: el.idRestaurant });
+      response.push({ ...el, items: commandItems, restoInfo: restoInfo });
+    }
+
+    res.status(200).json({ find: true, result: response });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
 
 exports.getAllAddress = (req, res) => {
   Users.customQuery("SELECT * FROM usersAddress WHERE idUser = ?", [req.params.idUser])

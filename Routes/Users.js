@@ -30,6 +30,9 @@ router.put('/:idUser/phoneNumber/:idPhoneNumber', limits(40, 15), existUser, exi
 
 router.get('/:idUser', limits(100, 15), existUser, authUserForRestaurant, userCtrl.getOneUser); // Récupère un utilisateur par lui même ou le restaurant
 router.get('/:idUser/commands', limits(100, 15), existUser, authUserMostSecure, userCtrl.getAllCommand); // Récupère les commandes d'un utilisateur
+router.get('/:idUser/commands/inProgress', limits(100, 15), existUser, authUserMostSecure, userCtrl.getInProgressCommands); // Récupère les commandes en cours d'un utilisateur
+router.get('/:idUser/commands/inProgress/notConnected', limits(100, 15), userCtrl.getInProgressCommandsNotConnected); // Récupère les commandes en cours d'un utilisateur
+router.get('/:idUser/commands/timestamp/:begin/:end', limits(100, 15), existUser, authUserMostSecure, userCtrl.getCommandsWithTimestamp); // Récupère les commandes sur une période d'un utilisateur
 router.get('/:idUser/address', limits(40, 15), existUser, authUserMostSecure, userCtrl.getAllAddress); // Récupère toutes les addresses d'un utilisateur
 router.get('/:idUser/address/:idAddress', limits(40, 15), existUser, existAddress, authUserMostSecure, userCtrl.getOneAddress); // Récupère une addresses d'un utilisateur
 router.get('/:idUser/phoneNumber', limits(40, 15), existUser, authUserMostSecure, userCtrl.getAllPhoneNumber); // Récupère tout les numéros d'un utilisateur

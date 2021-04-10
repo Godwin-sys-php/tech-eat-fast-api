@@ -3,14 +3,14 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const helmet = require('helmet');
 const fileUpload = require("express-fileupload");
-const mongoose = require('mongoose');
 
 const usersRoute = require('./Routes/Users');
 const usersRestaurantRoute = require('./Routes/UsersRestaurant');
 const restaurantRoute = require('./Routes/Restaurants');
 const menusRoute = require('./Routes/Menus');
 const dishesRoute = require('./Routes/Dishes');
-const mongoSanitize = require('mongo-sanitize');
+const commandsRoute = require('./Routes/Commands');
+
 const xss = require('xss');
 const path = require('path');
 const verifyToken = require('./Controllers/verifyToken');
@@ -38,7 +38,6 @@ app.use((req, res, next) => {
     for (let index in req.body) {
       if (_.isString(req.body[index])) {
         req.body[index] = req.body[index].trim();
-        req.body[index] = mongoSanitize(req.body[index]);
         req.body[index] = xss(req.body[index]);
       }
     }
@@ -60,6 +59,10 @@ app.use(
   "/Images-Dishes",
   express.static(path.join(__dirname, "Images-Dishes"))
 );
+app.use(
+  "/Invoices",
+  express.static(path.join(__dirname, "Invoices"))
+);
 
 app.use('/users', usersRoute);
 app.use('/users-restaurant', usersRestaurantRoute);
@@ -68,6 +71,6 @@ app.use('/menus', menusRoute);
 app.use('/dishes', dishesRoute);
 app.post('/verifyToken/restaurant', verifyToken);
 app.post('/verifyToken/user', verifyTokenUser);
-// app.use('/commands', commandsRoute);
+app.use('/commands', commandsRoute);
 
 module.exports = app;

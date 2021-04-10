@@ -24,10 +24,12 @@ exports.updateRestaurant = (req, res) => {
             res.status(200).json({ update: true });
           })
           .catch(error => {
+            console.log(error);
             res.status(500).json({ error: true, errorMessage: error });
           });
       })
       .catch(error => {
+        console.log(error);
         res.status(500).json({ error: true, errorMessage: error });
       });
   } else {

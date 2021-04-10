@@ -1,4 +1,5 @@
 const Users = require("../../Models/Users");
+const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 
@@ -17,7 +18,7 @@ module.exports = (req, res, next) => {
           if (!user) {// Si il n'existe pas
             res.status(403).json({ invalidToken: true });
           } else {
-            req.idUser = decodedToken.idUser;
+            req.user = user;
             next();// On passe au prochain middleware
           }
         })
@@ -28,4 +29,4 @@ module.exports = (req, res, next) => {
   } catch (error) {
     res.status(500).json({ error: true, errorMessage: error });
   }
-};
+}

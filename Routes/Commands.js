@@ -3,24 +3,31 @@ const router = require('express').Router();
 const limits = require('../Middlewares/Limits/limits');
 
 const existRestaurant = require('../Middlewares/Exists/existRestaurant');
+const validatorCommand = require('../Middlewares/Validators/validatorCommand');
 const existCommand = require('../Middlewares/Exists/existCommand');
-const authUser = require('../Middlewares/Auth/authUser');
+const authUserForCommands = require('../Middlewares/Auth/authUserForCommands');
 const authRestaurant = require('../Middlewares/Auth/authRestaurant');
-const authUserForUpdateOrDelete = require('../Middlewares/Auth/authUserForUpdateOrDelete');
+const authUserForGetAndDeleteCommand = require('../Middlewares/Auth/authUserForGetAndDeleteCommand');
 
+const generator = require('../Controllers/Generator');
 const commandCtrl = require('../Controllers/Commands');
 
-router.post('/restaurant/:idRestaurant', limits(50, 15), existRestaurant, authUser, commandCtrl.addCommand);
+router.post('/restaurant/:idRestaurant', limits(50, 15), existRestaurant, authUserForCommands, validatorCommand, commandCtrl.addCommand);
 
-router.put('/:idCommand/accept', limits(200, 15), existCommand, authRestaurant, commandCtrl.acceptCommand);
+router.put('/:idCommand/accept', limits(200, 15), existCommand, authRestaurant, commandCtrl.acceptCommand); 
 router.put('/:idCommand/refuse', limits(200, 15), existCommand, authRestaurant, commandCtrl.refuseCommand);
-router.put('/:idCommand', limits(200, 15), existCommand, authUser, authUserForUpdateOrDelete, commandCtrl.updateCommand);
-router.put('/:idCommand/setReady', limits(200, 15), existCommand, authRestaurant, commandCtrl.setReady);
-router.put('/:idCommand/setFinished', limits(200, 15), existCommand, authRestaurant, commandCtrl.setFinished);
+// router.put('/:idCommand', limits(200, 15), existCommand, authUser, authUserForUpdateOrDelete, commandCtrl.updateCommand);
+router.put('/:idCommand/setReady', limits(200, 15), existCommand, authRestaurant, commandCtrl.setReady, generator);
+router.put('/:idCommand/setDone', limits(200, 15), existCommand, authRestaurant, commandCtrl.setDone);
 
-router.get('/restaurant/:idRestaurant/not-finish', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getNotFinishedCommand);
-router.get('/restaurant/:idRestaurant', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getCommandOfRestaurant);
+router.get('/restaurant/:idRestaurant/not-done', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getNotDoneCommand);
+router.get('/:idCommand', limits(200, 15), existCommand, authUserForGetAndDeleteCommand, commandCtrl.getOneCommand);
+router.get('/:idCommand/notConnected', limits(200, 15), existCommand, commandCtrl.getOneCommandNotConnected);
+router.get('/restaurant/:idRestaurant/timestamp/:begin/:end', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getCommandOfRestaurantWithTimestamp);
+router.get('/restaurant/:idRestaurant/report/timestamp/:timestamp', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getOneDayReport);
+router.get('/restaurant/:idRestaurant/report/period/:begin/:end', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getPeriodReport);
 
-router.delete('/:idCommand', limits(200, 15), existCommand, authUserForUpdateOrDelete, commandCtrl.deleteOneCommand);
+router.delete('/:idCommand', limits(200, 15), existCommand, authUserForGetAndDeleteCommand, commandCtrl.deleteOneCommand);
+router.delete('/:idCommand/notConnected', limits(200, 15), existCommand, commandCtrl.deleteOneCommandNotConnected);
 
 module.exports = router;

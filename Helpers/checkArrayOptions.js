@@ -2,7 +2,7 @@
  * Vérifie, valide, modifie le tableau d'options des plâts et crée un noveau tableau formater pour mysql
  * @param  {Object} bodyOfRequest Le form-data de la requête
  * @param  {Boolean} needOptionsArray Le tableau d(options est requit?
- * @param  {Object} res L'objet de la requête
+ * @param  {Object} req L'objet de la requête
  * @returns {Boolean} Valide ou pas
  */
 
