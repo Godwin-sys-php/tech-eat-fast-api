@@ -11,7 +11,7 @@ module.exports = async (dishes, insertId) => {
   let commandItems = [];
   for (let index in dishes) {
     let el = dishes[index];
-    if (el.hasOwnProperty('idOption')) {
+    if (el.hasOwnProperty('idOption') && el.idOption !== null) {
       const dish = await Dishes.findOne({ idDish: el.idDish });
       const option = await Dishes.customQuery('SELECT * FROM dishOptions WHERE idDishOption = ?', [el.idOption]);
       commandItems.push([insertId, el.idDish, el.idOption, dish.name, option[0].name, option[0].price, el.quantity]);

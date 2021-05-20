@@ -5,10 +5,11 @@ const existRestaurant = require('../Middlewares/Exists/existRestaurant');
 const validatorRestaurant = require('../Middlewares/Validators/validatorRestaurant');
 const limits = require('../Middlewares/Limits/limits');
 const fileUpload = require('../Middlewares/Uploads/restaurantLogo');
+const resizer = require('../Middlewares/Resizer/resizer');
 
 const restoCtrl = require('../Controllers/Restaurants');
 
-router.put('/:idRestaurant', limits(30, 15), existRestaurant, authRestaurantAdmin, fileUpload, validatorRestaurant, restoCtrl.updateRestaurant); // Modifie un restaurant
+router.put('/:idRestaurant', limits(30, 15), existRestaurant, authRestaurantAdmin, fileUpload, resizer(500, "Images-Resto"), validatorRestaurant, restoCtrl.updateRestaurant); // Modifie un restaurant
 
 router.get('/:idRestaurant', limits(50, 15), existRestaurant, restoCtrl.getOneRestaurant); // Récupère un restaurant
 router.get('/other/search', limits(3000, 15), restoCtrl.searchOneRestaurant); // Rechercher un restaurant

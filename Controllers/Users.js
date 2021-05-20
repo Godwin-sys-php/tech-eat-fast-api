@@ -3,7 +3,10 @@ const Commands = require('../Models/Commands');
 const Restaurants = require('../Models/Restaurants');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 const moment = require('moment');
+const passwordValidator = require('password-validator');
 
 require('dotenv').config();
 
@@ -16,10 +19,11 @@ exports.signup = (req, res) => {
         email: req.body.email.toLowerCase(),
         pseudo: req.body.pseudo.toLowerCase(),
         creationDate: now.unix(),
+        pdpUrl: `${req.protocol}://${req.get("host")}/PDP_Users/default.jpg`,
         password: hash
       };
       Users.insertOne(toInsert)
-        .then(res.status(201).json({ create: true }))
+        .then(() => res.status(201).json({ create: true }))
         .catch(error => {
           res.status(500).json({ error: true, errorMessage: error });
         });
@@ -46,7 +50,7 @@ exports.login = (req, res) => {
               res.status(200).json({
                 user: { ...users, phoneNumbers: phoneNumbers, address: address, password: null, },
                 token: jwt.sign({ idUser: user[0].idUser }, process.env.TOKEN, {
-                  expiresIn: "336h",
+                  expiresIn: "720h",
                 })
               });
             }
@@ -129,6 +133,56 @@ exports.addPhoneNumber = (req, res) => {
     });
 };
 
+exports.forgotPassword = async (req, res) => {
+  try {
+    const email = req.body.email;
+    const user = await Users.findOne({ email: email });
+    if (user) {
+      const secret = process.env.TOKEN_FORGOT_PASSWORD + user.password;
+      const token = jwt.sign({ ...user }, secret, { expiresIn: "15m" });
+      const url = `http://localhost:3001/reset-password/${user.idUser}/${token}`;
+      console.log(url);
+      return res.status(200).json({ emailSend: true, });
+    } else {
+      return res.status(400).json({ invalidEmail: true, });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: true });
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    console.log('====================================');
+    console.log(req.body);
+    console.log('====================================');
+    const token = req.headers.authorization.split(' ')[1];
+    const password = req.body.password;
+    const user = req.user;
+    const decodedToken = jwt.verify(token, process.env.TOKEN_FORGOT_PASSWORD + user.password);
+
+    if (decodedToken.idUser == user.idUser) {
+      const schema = new passwordValidator();// On crée une nouvelle instance de l'objet
+      schema// On crée un nouveau schéma
+        .is().min(8)                                    // Minimum length 8
+        .has().uppercase()                              // Must have uppercase letters
+        .has().lowercase()                              // Must have lowercase letters
+        .has().digits(2)                                // Must have at least 2 digits
+      if (schema.validate(password)) {
+        const hash = await bcrypt.hash(password, 10);
+        await Users.updateOne({ password: hash }, { idUser: req.params.idUser });
+        return res.status(200).json({ update: true });
+      } else {
+        return res.status(400).json({ invalidForm: true });
+      }
+    } else {
+      return res.status(400).json({ invalidToken: true });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: true });
+  }
+}
+
 exports.updateOneUser = (req, res) => {
   let toSet;
   if (req.body.password) {
@@ -166,6 +220,32 @@ exports.updateOneUser = (req, res) => {
       });
   }
 };
+
+exports.changePDP = (req, res) => {
+  const toSet = {
+    pdpUrl: `${req.protocol}://${req.get("host")}/PDP_Users/${req.file.filename
+      }`,
+  };
+
+  Users.findOne({ idUser: req.params.idUser })
+    .then(user => {
+      const filename = user.pdpUrl.split("/PDP_Users/")[1];
+      filename !== "default.jpg" ? fs.unlinkSync(path.join(__dirname, '../PDP_Users', filename)) : () => { };
+
+      Users.updateOne(toSet, { idUser: req.params.idUser })
+        .then(() => {
+          res.status(200).json({ update: true });
+        })
+        .catch(error => {
+          console.log(error);
+          res.status(500).json({ error: true, errorMessage: error });
+        });
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ error: true, errorMessage: error });
+    });
+}
 
 exports.updateAddress = (req, res) => {
   const toSet = {

@@ -10,7 +10,7 @@ module.exports = async (dishes) => {
   let total = 0;
   for (let index in dishes) {
     let el = dishes[index];
-    if (el.hasOwnProperty('idOption')) {
+    if (el.hasOwnProperty('idOption') && el.idOption !== null) {
       const option = await Dishes.customQuery('SELECT * FROM dishOptions WHERE idDishOption = ?', [el.idOption]);
       total += option[0].price * el.quantity;
     } else {

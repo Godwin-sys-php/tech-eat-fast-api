@@ -9,13 +9,14 @@ const existDish = require('../Middlewares/Exists/existDish');
 const existOption = require('../Middlewares/Exists/existOption');
 const fileUpload = require('../Middlewares/Uploads/dishesImageForUpdate');
 const fileUpload2 = require('../Middlewares/Uploads/dishesImage');
+const resizer = require('../Middlewares/Resizer/resizer');
 
 const dishCtrl = require('../Controllers/Dishes');
 const existRestaurant = require('../Middlewares/Exists/existRestaurant');
 
-router.post('/menus/:idMenu', limits(80, 15), existMenu, authRestaurantMedium, validatorDish, fileUpload2, dishCtrl.addDish); // Ajoute un plats à un menu
+router.post('/menus/:idMenu', limits(80, 15), existMenu, authRestaurantMedium, validatorDish, fileUpload2, resizer(500, "Images-Dishes"), dishCtrl.addDish); // Ajoute un plats à un menu
 
-router.put('/:idDish', limits(80, 15), existDish, authRestaurantMedium, validatorDish, fileUpload, dishCtrl.updateDish); // Modifie un plats
+router.put('/:idDish', limits(80, 15), existDish, authRestaurantMedium, validatorDish, fileUpload, resizer(500, "Images-Dishes"), dishCtrl.updateDish); // Modifie un plats
 router.put('/:idDish/toogle', limits(80, 15), existDish, authRestaurantMedium, dishCtrl.toogleDish); // Rends un plats disponible ou indisponible
 
 router.get('/menus/:idMenu', limits(800, 15), existMenu, dishCtrl.getFromMenu); // Récupère tout les plats d'un menu

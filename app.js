@@ -51,6 +51,11 @@ app.use(
   "/PDP_Resto",
   express.static(path.join(__dirname, "PDP_Resto"))
 );
+
+app.use(
+  "/PDP_Users",
+  express.static(path.join(__dirname, "PDP_Users"))
+);
 app.use(
   "/Images-Resto",
   express.static(path.join(__dirname, "Images-Resto"))

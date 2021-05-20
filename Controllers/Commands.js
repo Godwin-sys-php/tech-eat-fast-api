@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 const calculateSum = require('../Helpers/calculateSum');
 const createDishesTable = require('../Helpers/createDishesTable');
+const fetch = require('node-fetch');
 
 exports.addCommand = async (req, res) => {
   try {
@@ -19,6 +20,7 @@ exports.addCommand = async (req, res) => {
         idRestaurant: req.params.idRestaurant,
         idUser: req.user.idUser,
         orderId: uuidv4(),
+        pushToken: req.body.pushToken ? req.body.pushToken : null,
         nameOfClient: req.user.name,
         emailOfClient: req.user.email,
         phoneNumberOfClient: req.body.phoneNumber,
@@ -37,20 +39,21 @@ exports.addCommand = async (req, res) => {
         .then(async result => {
           const insertId = result.insertId;
 
-          const commandItems = await createDishesTable(dishes, insertId);
-
-          Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
-            .then((result) => {
-              res.status(201).json({ create: true, insertId: insertId });
-            })
-            .catch(error => {
-              console.log(error);
-              res.status(500).json({ error: true, });
-            });
+          try {
+            const commandItems = await createDishesTable(dishes, insertId);
+            await Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
+              .then(async (result) => {
+                return res.status(201).json({ create: true, insertId: insertId });
+              })
+              .catch(error => {
+                return res.status(500).json({ error: true, });
+              });
+          } catch (error) {
+            return res.status(500).json({ error: true });
+          }
         })
         .catch((error) => {
-          console.log(error);
-          res.status(500).json({ error: true });
+          return res.status(500).json({ error: true });
         });
     } else {
       const now = moment();
@@ -64,6 +67,7 @@ exports.addCommand = async (req, res) => {
         orderId: uuidv4(),
         nameOfClient: req.body.name,
         deviceId: req.body.deviceId,
+        pushToken: req.body.pushToken ? req.body.pushToken : null,
         emailOfClient: null,
         phoneNumberOfClient: req.body.phoneNumber,
         address: req.body.type === "toTake" ? null : req.body.address,
@@ -106,8 +110,25 @@ exports.acceptCommand = async (req, res) => {
     const command = await Commands.findOne({ idCommand: req.params.idCommand });
     if (command.status !== "done") {
       Commands.updateOne({ accept: true, status: "inCooking", lastUpdate: now.unix() }, { idCommand: req.params.idCommand })
-        .then(() => {
-          res.status(200).json({ update: true });
+        .then(async () => {
+          const message = {
+            to: command.pushToken,
+            sound: 'default',
+            title: 'Votre commande a été accepter 😉!',
+            body: 'Il est en cuisine',
+            data: {idCommand: command.idCommand},
+          };
+
+          await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Accept-encoding': 'gzip, deflate',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+          });
+          return res.status(200).json({ update: true });
         })
         .catch(error => {
           res.status(500).json({ error: true });
@@ -127,8 +148,26 @@ exports.refuseCommand = async (req, res) => {
       const command = await Commands.findOne({ idCommand: req.params.idCommand });
       if (command.status !== "done" && command.status !== "outOfRestaurant" && command.status !== "ready") {
         Commands.updateOne({ accept: false, whyRefused: req.body.whyRefused, lastUpdate: now.unix() }, { idCommand: req.params.idCommand })
-          .then(() => {
-            res.status(200).json({ update: true });
+          .then(async () => {
+
+            const message = {
+              to: command.pushToken,
+              sound: 'default',
+              title: 'Votre commande a été refuser 🥺!',
+              body: req.body.whyRefused,
+              data: {idCommand: command.idCommand},
+            };
+
+            await fetch('https://exp.host/--/api/v2/push/send', {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(message),
+            });
+            return res.status(200).json({ update: true });
           })
           .catch(error => {
             res.status(500).json({ error: true });
@@ -154,7 +193,24 @@ exports.setReady = async (req, res, next) => {
 
     if (command.status === "inCooking") {
       Commands.updateOne({ accept: true, status: command.type === "toDelive" ? "outOfRestaurant" : "ready", lastUpdate: now.unix() }, { idCommand: req.params.idCommand })
-        .then(() => {
+        .then(async () => {
+          const message = {
+            to: command.pushToken,
+            sound: 'default',
+            title: command.type === "toDelive" ? "Votre commande est en cours de livraison, patientez un peu ça en vaut la peine 😋" : "Votre commande est prête, vous pouvez venir la chercher 😋",
+            body: 'Vous y êtes presque',
+            data: {idCommand: command.idCommand},
+          };
+
+          await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Accept-encoding': 'gzip, deflate',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+          });
           req.command = command;
           req.restoInfo = restoInfo;
           req.commandItems = commandItems;
@@ -177,7 +233,24 @@ exports.setDone = async (req, res) => {
     const command = await Commands.findOne({ idCommand: req.params.idCommand });
     if (command.status === "outOfRestaurant" || command.status === "ready" || !command.accept) {
       Commands.updateOne({ accept: true, status: "done", lastUpdate: now.unix() }, { idCommand: req.params.idCommand })
-        .then(() => {
+        .then(async () => {
+          const message = {
+            to: command.pushToken,
+            sound: 'default',
+            title: "Votre commande vient d'être clôturer, c'etait un plaisir ❤️ 😋",
+            body: "Nous espérons que vous avez aimé le service",
+            data: {idCommand: command.idCommand},
+          };
+
+          await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Accept-encoding': 'gzip, deflate',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+          });
           res.status(200).json({ update: true });
         })
         .catch(error => {
@@ -218,12 +291,12 @@ exports.getOneCommand = async (req, res) => {
 
     for (let index in commandItems) {
       let dish = await Dishes.findOne({ idDish: commandItems[index].idDish });
-      items.push({...commandItems[index], dishInfo: dish });
+      items.push({ ...commandItems[index], dishInfo: dish });
     }
 
     const restoInfo = await Restaurants.findOne({ idRestaurant: command.idRestaurant });
 
-    res.status(200).json({ find: true, result: { ...command, items: items, restoInfo: restoInfo} });
+    res.status(200).json({ find: true, result: { ...command, items: items, restoInfo: restoInfo } });
   } catch (error) {
     res.status(500).json({ error: true });
   }
@@ -239,13 +312,13 @@ exports.getOneCommandNotConnected = async (req, res) => {
 
     for (let index in commandItems) {
       let dish = await Dishes.findOne({ idDish: commandItems[index].idDish });
-      items.push({...commandItems[index], dishInfo: dish });
+      items.push({ ...commandItems[index], dishInfo: dish });
     }
 
     const restoInfo = await Restaurants.findOne({ idRestaurant: command.idRestaurant });
 
     if (req.headers.hasOwnProperty('authorization') && req.headers.authorization.split(' ')[1] === command.deviceId) {
-      res.status(200).json({ find: true, result: { ...command, items: items, restoInfo: restoInfo} });
+      res.status(200).json({ find: true, result: { ...command, items: items, restoInfo: restoInfo } });
     } else {
       res.status(400).json({ invalidToken: true });
     }
@@ -335,7 +408,7 @@ exports.getPeriodReport = async (req, res) => {
 exports.deleteOneCommand = async (req, res) => {
   try {
     const command = await Commands.findOne({ idCommand: req.params.idCommand });
-    if (command.status === "inLoading"  && command.accept === null) {
+    if (command.status === "inLoading" && command.accept === null) {
       Commands.delete({ idCommand: req.params.idCommand })
         .then(() => {
           res.status(200).json({ delete: true });
@@ -354,7 +427,7 @@ exports.deleteOneCommand = async (req, res) => {
 exports.deleteOneCommandNotConnected = async (req, res) => {
   try {
     const command = await Commands.findOne({ idCommand: req.params.idCommand });
-    if (command.status === "inLoading"  && command.accept === null) {
+    if (command.status === "inLoading" && command.accept === null) {
       if (req.headers.hasOwnProperty('authorization') && req.headers.authorization.split(' ')[1] === command.deviceId) {
         Commands.delete({ idCommand: req.params.idCommand })
           .then(() => {

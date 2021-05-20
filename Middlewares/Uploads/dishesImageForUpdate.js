@@ -1,4 +1,4 @@
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   if (req.files && req.files.imageDish) {
     const MIME_TYPES = {
       "image/jpg": "jpg",
@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
     if (MIME_TYPES_ARRAY.includes(imageUpload.mimetype)) {
       const extension = MIME_TYPES[imageUpload.mimetype];
       const timestamp = Date.now();
-      imageUpload.mv(`./Images-Dishes/${imageUpload.name}_${timestamp}.${extension}`);
+      await imageUpload.mv(`./Images-Dishes/${imageUpload.name}_${timestamp}.${extension}`);
       req.file = { filename: `${imageUpload.name}_${timestamp}.${extension}` };
       next();
     } else {

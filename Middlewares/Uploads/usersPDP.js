@@ -1,5 +1,5 @@
 module.exports = async (req, res, next) => {
-  if (req.files && req.files.logo) {
+  if (req.files && req.files.pdp) {
     const MIME_TYPES = {
       "image/jpg": "jpg",
       "image/jpeg": "jpg",
@@ -10,18 +10,18 @@ module.exports = async (req, res, next) => {
       "image/jpeg",
       "image/png"
     ];
-    const imageUpload = req.files.logo;
+    const imageUpload = req.files.pdp;
     
     if (MIME_TYPES_ARRAY.includes(imageUpload.mimetype)) {
       const extension = MIME_TYPES[imageUpload.mimetype];
       const timestamp = Date.now();
-      await imageUpload.mv(`./Images-Resto/${req.params.idRestaurant}.${timestamp}.${extension}`);
-      req.file = { filename: `${req.params.idRestaurant}.${timestamp}.${extension}` };
+      await imageUpload.mv(`./PDP_Users/${imageUpload.name}_${timestamp}.${extension}`);
+      req.file = { filename: `${imageUpload.name}_${timestamp}.${extension}` };
       next();
     } else {
       res.status(400).json({ badFile: true });
     }
   } else {
-    next();
+    res.status(400).json({ needImage: true });
   }
 };

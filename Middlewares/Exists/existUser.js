@@ -4,6 +4,7 @@ module.exports = (req, res, next) => {
   Users.findOne({ idUser: req.params.idUser })
     .then(user => {
       if (user) {
+        req.user = user;
         next();
       } else {
         res.status(404).json({ userNotFound: true });
