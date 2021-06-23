@@ -8,7 +8,7 @@ module.exports = (arr, Request) => {
   let valid = true;
   let newArr = [];
   for (let index in arr) {
-    if (!(typeof arr[index] === 'string' && arr[index].length >= 5 && arr[index].length < 300)) {
+    if (!(typeof arr[index] === 'string' && arr[index].length >= 2 && arr[index].length < 300)) {
       valid = false;
       break;
     } else {

@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
 const passwordValidator = require('password-validator');
+const createDishTableForCommandsSaved = require('../Helpers/createDishTableForCommandsSaved');
 
 require('dotenv').config();
 
@@ -94,7 +95,8 @@ exports.loginNoJwt = (req, res) => {
 exports.addAddress = (req, res) => {
   const toInsert = {
     idUser: req.params.idUser,
-    address: req.body.address
+    address: req.body.address,
+    reference: req.body.reference ? req.body.reference : null,
   };
 
   Users.customQuery("INSERT INTO usersAddress SET ?", [toInsert])
@@ -132,6 +134,47 @@ exports.addPhoneNumber = (req, res) => {
       res.status(500).json({ error: true, errorMessage: error });
     });
 };
+
+exports.addCommandSaved = (req, res) => {
+  const now = moment();
+
+  const dishes = req.body.dishes;
+  const toInsert = {
+    idRestaurant: req.body.idRestaurant,
+    idUser: req.params.idUser,
+    nameOfClient: req.user.name,
+    nameOfCommand: req.body.name,
+    emailOfClient: req.user.email,
+    phoneNumberOfClient: req.body.phoneNumber,
+    address: req.body.type === "toTake" ? null : req.body.address,
+    comment: req.body.comment,
+    type: req.body.type,
+    creationDate: now.unix(),
+    lastUpdate: now.unix(),
+    paymentMethod: req.body.paymentMethod,
+  };
+
+  Users.customQuery("INSERT INTO commandsSaved SET ?", toInsert)
+    .then(async result => {
+      const insertId = result.insertId;
+
+      try {
+        const commandItems = await createDishTableForCommandsSaved(dishes, insertId);
+        await Commands.customQuery('INSERT INTO commandSavedItems (idCommandSaved, idDish, idOption, quantity) VALUES ?', [commandItems])
+          .then(async (result) => {
+            return res.status(201).json({ create: true, insertId: insertId });
+          })
+          .catch(error => {
+            return res.status(500).json({ error: true, });
+          });
+      } catch (error) {
+        return res.status(500).json({ error: true });
+      }
+    })
+    .catch((error) => {
+      return res.status(500).json({ error: true });
+    });
+}
 
 exports.forgotPassword = async (req, res) => {
   try {
@@ -250,8 +293,10 @@ exports.changePDP = (req, res) => {
 exports.updateAddress = (req, res) => {
   const toSet = {
     address: req.body.address,
+    reference: req.body.reference ? req.body.reference : null,
   };
 
+  if (req.address.idUser == req.user.idUser) {
   Users.customQuery("UPDATE usersAddress SET ? WHERE idUserAdress = ?", [toSet, req.params.idAddress])
     .then(() => {
       Users.customQuery("SELECT * FROM usersAddress WHERE idUser = ?", [req.params.idUser])
@@ -265,6 +310,9 @@ exports.updateAddress = (req, res) => {
     .catch(error => {
       res.status(500).json({ error: true, errorMessage: error });
     });
+  } else {
+    res.status(400).json({ invalidToken: true });
+  }
 };
 
 exports.updatePhoneNumber = (req, res) => {
@@ -272,19 +320,23 @@ exports.updatePhoneNumber = (req, res) => {
     phoneNumber: req.body.phoneNumber,
   };
 
-  Users.customQuery("UPDATE usersPhoneNumber SET ? WHERE idUserPhoneNumber = ?", [toSet, req.params.idPhoneNumber])
-    .then(() => {
-      Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [req.params.idUser])
-        .then((phoneNumbers) => {
-          res.status(201).json({ update: true, phoneNumbers: phoneNumbers })
-        })
-        .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
-        });
-    })
-    .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
-    });
+  if (req.phoneNumber.idUser == req.user.idUser) {
+    Users.customQuery("UPDATE usersPhoneNumber SET ? WHERE idUserPhoneNumber = ?", [toSet, req.params.idPhoneNumber])
+      .then(() => {
+        Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [req.params.idUser])
+          .then((phoneNumbers) => {
+            res.status(201).json({ update: true, phoneNumbers: phoneNumbers })
+          })
+          .catch(error => {
+            res.status(500).json({ error: true, errorMessage: error });
+          });
+      })
+      .catch(error => {
+        res.status(500).json({ error: true, errorMessage: error });
+      });
+  } else {
+    res.status(400).json({  invalidToken: true  });
+  }
 };
 
 exports.getOneUser = async (req, res) => {
@@ -381,16 +433,6 @@ exports.getAllAddress = (req, res) => {
     });
 };
 
-exports.getOneAddress = (req, res) => {
-  Users.customQuery("SELECT * FROM usersAddress WHERE idUserAdress = ?", [req.params.idAddress])
-    .then((address) => {
-      res.status(200).json({ find: true, result: address, });
-    })
-    .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
-    });
-};
-
 exports.getAllPhoneNumber = (req, res) => {
   Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [req.params.idUser])
     .then((phoneNumber) => {
@@ -401,15 +443,14 @@ exports.getAllPhoneNumber = (req, res) => {
     });
 };
 
-exports.getOnePhoneNumber = (req, res) => {
-  Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUserPhoneNumber = ?", [req.params.idPhoneNumber])
-    .then((phoneNumber) => {
-      res.status(200).json({ find: true, result: phoneNumber, });
-    })
-    .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
-    });
-};
+exports.getAllCommandsSaved = async (req, res) => {
+  try {
+    const commands = await Commands.customQuery("SELECT * FROM commandsSaved WHERE idUser = ?", [req.params.idUser]);
+    res.status(200).json({ find: true, results: commands });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
 
 exports.deleteOneUser = (req, res) => {
   Users.delete({ idUser: req.params.idUser })
@@ -422,33 +463,41 @@ exports.deleteOneUser = (req, res) => {
 };
 
 exports.deleteOneAddress = (req, res) => {
-  Users.customQuery("DELETE FROM usersAddress WHERE idUserAdress = ?", [req.params.idAddress])
-    .then(() => {
-      Users.customQuery("SELECT * FROM usersAddress WHERE idUser = ?", [req.params.idUser])
-        .then((address) => {
-          res.status(201).json({ delete: true, address: address })
-        })
-        .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
-        });
-    })
-    .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
-    });
+  if (req.address.idUser == req.user.idUser) {
+    Users.customQuery("DELETE FROM usersAddress WHERE idUserAdress = ?", [req.params.idAddress])
+      .then(() => {
+        Users.customQuery("SELECT * FROM usersAddress WHERE idUser = ?", [req.params.idUser])
+          .then((address) => {
+            res.status(201).json({ delete: true, address: address })
+          })
+          .catch(error => {
+            res.status(500).json({ error: true, errorMessage: error });
+          });
+      })
+      .catch(error => {
+        res.status(500).json({ error: true, errorMessage: error });
+      });
+  } else {
+    res.status(400).json({ invalidToken: true });
+  }
 };
 
 exports.deleteOnePhoneNumber = (req, res) => {
-  Users.customQuery("DELETE FROM usersPhoneNumber WHERE idUserPhoneNumber = ?", [req.params.idPhoneNumber])
-    .then(() => {
-      Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [req.params.idUser])
-        .then((phoneNumbers) => {
-          res.status(201).json({ delete: true, phoneNumbers: phoneNumbers })
-        })
-        .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
-        });
-    })
-    .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
-    });
+  if (req.phoneNumber.idUser == req.user.idUser) {
+    Users.customQuery("DELETE FROM usersPhoneNumber WHERE idUserPhoneNumber = ?", [req.params.idPhoneNumber])
+      .then(() => {
+        Users.customQuery("SELECT * FROM usersPhoneNumber WHERE idUser = ?", [req.params.idUser])
+          .then((phoneNumbers) => {
+            res.status(201).json({ delete: true, phoneNumbers: phoneNumbers })
+          })
+          .catch(error => {
+            res.status(500).json({ error: true, errorMessage: error });
+          });
+      })
+      .catch(error => {
+        res.status(500).json({ error: true, errorMessage: error });
+      });;
+  } else {
+    res.status(400).json({ invalidToken: true });
+  }
 };

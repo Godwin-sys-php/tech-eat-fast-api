@@ -25,6 +25,7 @@ exports.addCommand = async (req, res) => {
         emailOfClient: req.user.email,
         phoneNumberOfClient: req.body.phoneNumber,
         address: req.body.type === "toTake" ? null : req.body.address,
+        reference: req.body.reference ? req.body.reference : null,
         comment: req.body.comment,
         type: req.body.type,
         creationDate: now.unix(),
@@ -71,6 +72,7 @@ exports.addCommand = async (req, res) => {
         emailOfClient: null,
         phoneNumberOfClient: req.body.phoneNumber,
         address: req.body.type === "toTake" ? null : req.body.address,
+        reference: req.body.reference ? req.body.reference : null,
         comment: req.body.comment,
         type: req.body.type,
         creationDate: now.unix(),
@@ -84,6 +86,7 @@ exports.addCommand = async (req, res) => {
       Commands.insertOne(toInsertCommand)
         .then(async result => {
           const insertId = result.insertId;
+          console.log(dishes);
           const commandItems = await createDishesTable(dishes, insertId);
 
           Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
@@ -104,6 +107,117 @@ exports.addCommand = async (req, res) => {
   }
 }
 
+exports.addCommandAndPay = async (req, res) => {
+  try {
+    if (req.haveToken) {
+      const now = moment();
+
+      const dishes = req.body.dishes;
+
+      const total = await calculateSum(dishes);
+
+      let toInsertCommand = {
+        idRestaurant: req.params.idRestaurant,
+        idUser: req.user.idUser,
+        orderId: uuidv4(),
+        pushToken: req.body.pushToken ? req.body.pushToken : null,
+        nameOfClient: req.user.name,
+        emailOfClient: req.user.email,
+        phoneNumberOfClient: req.body.phoneNumber,
+        address: req.body.type === "toTake" ? null : req.body.address,
+        reference: req.body.reference ? req.body.reference : null,
+        comment: req.body.comment,
+        type: req.body.type,
+        creationDate: now.unix(),
+        lastUpdate: now.unix(),
+        total: total,
+        paymentMethod: req.body.paymentMethod,
+        accept: null,
+        status: "inLoading",
+        payed: true,
+      };
+
+      Commands.insertOne(toInsertCommand)
+        .then(async result => {
+          const insertId = result.insertId;
+
+          try {
+            const commandItems = await createDishesTable(dishes, insertId);
+            await Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
+              .then(async (result) => {
+                return res.status(201).json({ create: true, insertId: insertId });
+              })
+              .catch(error => {
+                return res.status(500).json({ error: true, });
+              });
+          } catch (error) {
+            return res.status(500).json({ error: true });
+          }
+        })
+        .catch((error) => {
+          return res.status(500).json({ error: true });
+        });
+    } else {
+      const now = moment();
+
+      const dishes = req.body.dishes;
+      const total = await calculateSum(dishes);
+
+      let toInsertCommand = {
+        idRestaurant: req.params.idRestaurant,
+        idUser: null,
+        orderId: uuidv4(),
+        nameOfClient: req.body.name,
+        deviceId: req.body.deviceId,
+        pushToken: req.body.pushToken ? req.body.pushToken : null,
+        emailOfClient: null,
+        phoneNumberOfClient: req.body.phoneNumber,
+        address: req.body.type === "toTake" ? null : req.body.address,
+        reference: req.body.reference ? req.body.reference : null,
+        comment: req.body.comment,
+        type: req.body.type,
+        creationDate: now.unix(),
+        lastUpdate: now.unix(),
+        total: total,
+        paymentMethod: req.body.paymentMethod,
+        accept: null,
+        status: "inLoading",
+        payed: true,
+      };
+
+      Commands.insertOne(toInsertCommand)
+        .then(async result => {
+          const insertId = result.insertId;
+          console.log(dishes);
+          const commandItems = await createDishesTable(dishes, insertId);
+
+          Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
+            .then(() => {
+              res.status(201).json({ create: true, insertId: insertId });
+            })
+            .catch(error => {
+              res.status(500).json({ error: true, errorMessage: error });
+            });
+        })
+        .catch(() => {
+          res.status(500).json({ error: true });
+        });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true });
+  }
+}
+
+exports.payCommand = async (req, res) => {
+  try {
+    const request = await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
+    return res.status(200).json({ update: true });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+
 exports.acceptCommand = async (req, res) => {
   try {
     const now = moment();
@@ -116,7 +230,7 @@ exports.acceptCommand = async (req, res) => {
             sound: 'default',
             title: 'Votre commande a été accepter 😉!',
             body: 'Il est en cuisine',
-            data: {idCommand: command.idCommand},
+            data: { idCommand: command.idCommand },
           };
 
           await fetch('https://exp.host/--/api/v2/push/send', {
@@ -155,7 +269,7 @@ exports.refuseCommand = async (req, res) => {
               sound: 'default',
               title: 'Votre commande a été refuser 🥺!',
               body: req.body.whyRefused,
-              data: {idCommand: command.idCommand},
+              data: { idCommand: command.idCommand },
             };
 
             await fetch('https://exp.host/--/api/v2/push/send', {
@@ -199,7 +313,7 @@ exports.setReady = async (req, res, next) => {
             sound: 'default',
             title: command.type === "toDelive" ? "Votre commande est en cours de livraison, patientez un peu ça en vaut la peine 😋" : "Votre commande est prête, vous pouvez venir la chercher 😋",
             body: 'Vous y êtes presque',
-            data: {idCommand: command.idCommand},
+            data: { idCommand: command.idCommand },
           };
 
           await fetch('https://exp.host/--/api/v2/push/send', {
@@ -239,7 +353,7 @@ exports.setDone = async (req, res) => {
             sound: 'default',
             title: "Votre commande vient d'être clôturer, c'etait un plaisir ❤️ 😋",
             body: "Nous espérons que vous avez aimé le service",
-            data: {idCommand: command.idCommand},
+            data: { idCommand: command.idCommand },
           };
 
           await fetch('https://exp.host/--/api/v2/push/send', {

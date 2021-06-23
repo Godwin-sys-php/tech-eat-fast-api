@@ -10,7 +10,6 @@ exports.updateRestaurant = (req, res) => {
       website: req.body.website,
       address: req.body.address,
       description: req.body.description,
-      acceptCash: req.body.acceptCash,
       logoUrl: `${req.protocol}://${req.get('host')}/Images-Resto/${req.file.filename}`,
     };
 
@@ -38,7 +37,6 @@ exports.updateRestaurant = (req, res) => {
       website: req.body.website,
       address: req.body.address,
       description: req.body.description,
-      acceptCash: req.body.acceptCash,
     };
     Restaurants.updateOne(toSet, { idRestaurant: req.params.idRestaurant })
       .then(() => {
