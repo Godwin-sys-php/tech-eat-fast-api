@@ -389,6 +389,7 @@ exports.getInProgressCommands = async (req, res) => {
 
 exports.getInProgressCommandsNotConnected = async (req, res) => {
   try {
+    console.log(req.params.idUser);
     const commands = await Commands.customQuery('SELECT * FROM commands WHERE deviceId = ? AND status != "done" ORDER BY idCommand DESC', [req.params.idUser]);
     let response = [];
 

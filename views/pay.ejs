@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+
+<body onload="document.form.submit()" class="container">
+  <form action="https://api-testbed.maxicashapp.com/PayEntryPost" id="form" name="choucroute" method="POST">
+    <br /><br />
+    <input type="hidden" name="PayType" value="<%= PayType %>">
+    <input type="hidden" name="Amount" value="<%= Amount %>">
+    <input type="hidden" name="Currency" value="<%= Currency %>">
+    <input type="hidden" name="Telephone" value="<%= Telephone%>">
+    <input type="hidden" name="Email" value="<%= Email %>">
+
+    <input type="hidden" name="MerchantID" value="<%= MerchantID %>">
+    <input type="hidden" name="MerchantPassword" value="<%= MerchantPassword%>">
+    <input type="hidden" name="Language" value="Fr">
+    <input type="hidden" name="Reference" value="<%= Reference %>">
+    <input type="hidden" name="accepturl" value="<%= accepturl %>">
+    <input type="hidden" name="cancelurl" value="<%= cancelurl %>">
+    <input type="hidden" name="declineurl" value="<%= declineurl%>">
+    <input type="hidden" name="notifyurl" value="<%= notifyurl %>">
+    <div class="d-grid gap-2">
+      <input class="btn btn-primary" id="btnSubmit" type="submit" value="Passer au paiment">
+    </div>
+  </form>
+
+  <script type="text/javascript">
+    (function () {
+      document.forms['choucroute'].submit();
+      document.getElementById("form").submit();
+    })();
+    window.onload = function () {
+      document.forms['choucroute'].submit();
+      document.getElementById("form").submit();
+    }
+
+    function onload() {
+      document.forms['choucroute'].submit();
+      document.getElementById("form").submit();
+    }
+  </script>
+</body>
+
+</html>

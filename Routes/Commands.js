@@ -9,6 +9,7 @@ const authUserForCommands = require('../Middlewares/Auth/authUserForCommands');
 const authRestaurant = require('../Middlewares/Auth/authRestaurant');
 const authUserForGetAndDeleteCommand = require('../Middlewares/Auth/authUserForGetAndDeleteCommand');
 const authMobile = require('../Middlewares/Auth/authMobile');
+const authMobile2 = require('../Middlewares/Auth/authMobile2');
 
 const generator = require('../Controllers/Generator');
 const commandCtrl = require('../Controllers/Commands');
@@ -21,7 +22,6 @@ router.put('/:idCommand/refuse', limits(200, 15), existCommand, authRestaurant, 
 // router.put('/:idCommand', limits(200, 15), existCommand, authUser, authUserForUpdateOrDelete, commandCtrl.updateCommand);
 router.put('/:idCommand/setReady', limits(200, 15), existCommand, authRestaurant, commandCtrl.setReady, generator);
 router.put('/:idCommand/setDone', limits(200, 15), existCommand, authRestaurant, commandCtrl.setDone);
-router.put('/:idCommand/pay', limits(50, 15), existRestaurant, authMobile, validatorCommand, commandCtrl.payCommand); // Paye une commande (+ token)
 
 router.get('/restaurant/:idRestaurant/not-done', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getNotDoneCommand);
 router.get('/:idCommand', limits(200, 15), existCommand, authUserForGetAndDeleteCommand, commandCtrl.getOneCommand);
@@ -29,6 +29,9 @@ router.get('/:idCommand/notConnected', limits(200, 15), existCommand, commandCtr
 router.get('/restaurant/:idRestaurant/timestamp/:begin/:end', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getCommandOfRestaurantWithTimestamp);
 router.get('/restaurant/:idRestaurant/report/timestamp/:timestamp', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getOneDayReport);
 router.get('/restaurant/:idRestaurant/report/period/:begin/:end', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getPeriodReport);
+
+router.get('/:idCommand/pay', limits(50, 15), existCommand, authMobile2, commandCtrl.payCommand); // Paye une commande (+ token)
+router.get('/:idCommand/payConfirm', limits(50, 15), existCommand, authMobile2, commandCtrl.payConfirmCommand); // Confirme le paiement d'une commande (+ token)
 
 router.delete('/:idCommand', limits(200, 15), existCommand, authUserForGetAndDeleteCommand, commandCtrl.deleteOneCommand);
 router.delete('/:idCommand/notConnected', limits(200, 15), existCommand, commandCtrl.deleteOneCommandNotConnected);

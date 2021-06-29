@@ -211,7 +211,35 @@ exports.addCommandAndPay = async (req, res) => {
 
 exports.payCommand = async (req, res) => {
   try {
-    const request = await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
+    const data = await Commands.findOne({ idCommand: req.params.idCommand });
+    if (data.payed) {
+      return res.render('alreadyPayed');
+    } else {
+      const data = {
+        PayType: "MaxiCash",
+        Amount: "500",
+        Currency: "maxiDollar",
+        Telephone: "0814461960",
+        Email: "godwinnyembo2@gmail.com",
+        MerchantID: "43fbc30291724be4bababf888a974c63",
+        MerchantPassword: "450108b811294b03aca56a2ec560236d",
+        Language: "Fr",
+        Reference: "LOLCAT",
+        accepturl: "https://google.com",
+        declineurl: "https://apple.com",
+        cancelurl: "https://apple.com",
+        notifyurl: "https://github.com",
+      }; 
+      return res.render('pay', data);
+    }
+  } catch (error) {
+    return res.status(500).json({ error: true });
+  }
+}
+
+exports.payConfirmCommand = async (req, res) => {
+  try {
+    await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
     return res.status(200).json({ update: true });
   } catch (error) {
     res.status(500).json({ error: true });
@@ -228,8 +256,8 @@ exports.acceptCommand = async (req, res) => {
           const message = {
             to: command.pushToken,
             sound: 'default',
-            title: 'Votre commande a été accepter 😉!',
-            body: 'Il est en cuisine',
+            title: 'Votre commande a été accepté 😉!',
+            body: 'Elle est en cuisine',
             data: { idCommand: command.idCommand },
           };
 
@@ -267,7 +295,7 @@ exports.refuseCommand = async (req, res) => {
             const message = {
               to: command.pushToken,
               sound: 'default',
-              title: 'Votre commande a été refuser 🥺!',
+              title: 'Votre commande a été refusé 🥺!',
               body: req.body.whyRefused,
               data: { idCommand: command.idCommand },
             };
@@ -380,6 +408,7 @@ exports.setDone = async (req, res) => {
 
 exports.getNotDoneCommand = async (req, res) => {
   try {
+    console.log(req);
     const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND status != "done" ORDER BY lastUpdate DESC', [req.params.idRestaurant]);
     let response = [];
 

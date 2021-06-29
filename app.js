@@ -19,9 +19,9 @@ const _ = require('underscore');
 
 require('dotenv').config();
 
-// Connexion à mongoDB
-
 const app = express();
+
+app.set('view engine', 'ejs');
 
 app.use(cors()); // On accepte toute les requêtes de n'importe quelle serveur
 
@@ -77,5 +77,9 @@ app.use('/dishes', dishesRoute);
 app.post('/verifyToken/restaurant', verifyToken);
 app.post('/verifyToken/user', verifyTokenUser);
 app.use('/commands', commandsRoute);
+
+app.get('/test-quick', (req, res) => {
+  res.redirect('exp://127.0.0.1:19000/');
+})
 
 module.exports = app;
