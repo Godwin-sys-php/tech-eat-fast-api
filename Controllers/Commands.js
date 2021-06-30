@@ -225,11 +225,11 @@ exports.payCommand = async (req, res) => {
         MerchantPassword: "450108b811294b03aca56a2ec560236d",
         Language: "Fr",
         Reference: "LOLCAT",
-        accepturl: "https://google.com",
-        declineurl: "https://apple.com",
-        cancelurl: "https://apple.com",
-        notifyurl: "https://github.com",
-      }; 
+        accepturl: `${req.protocol}://${req.get("host")}/commands/${data.idCommand}/payConfirmCommand?action=accept`,
+        declineurl: `${req.protocol}://${req.get("host")}/commands/${data.idCommand}/payConfirmCommand?action=decline`,
+        cancelurl: `${req.protocol}://${req.get("host")}/commands/${data.idCommand}/payConfirmCommand?action=cancel`,
+        notifyurl: ``,
+      };
       return res.render('pay', data);
     }
   } catch (error) {
@@ -239,8 +239,15 @@ exports.payCommand = async (req, res) => {
 
 exports.payConfirmCommand = async (req, res) => {
   try {
-    await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
-    return res.status(200).json({ update: true });
+    switch (req.query.action) {
+      case 'accept':
+        await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
+        return res.render('accept');
+      case 'decline':
+        return res.render('decline');
+      case 'cancel':
+        return res.render('cancel');
+    }
   } catch (error) {
     res.status(500).json({ error: true });
   }
