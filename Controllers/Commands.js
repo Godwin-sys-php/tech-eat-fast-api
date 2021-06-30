@@ -232,8 +232,8 @@ exports.payCommand = async (req, res) => {
         Language: "Fr",
         Reference: "LOLCAT",
         accepturl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=accept&token=${token}`,
-        declineurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=decline${token}`,
-        cancelurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=cancel${token}`,
+        declineurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=decline&token=${token}`,
+        cancelurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=cancel&token=${token}`,
         notifyurl: ``,
       };
       return res.render('pay', data);
