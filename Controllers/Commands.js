@@ -218,7 +218,7 @@ exports.payCommand = async (req, res) => {
     if (data.payed) {
       return res.render('alreadyPayed');
     } else {
-      const token = jwt.sign({ idCommand: req.params.idCommand }, process.env.TOKEN, {
+      const token = jwt.sign({ idCommand: req.params.idCommand }, process.env.TOKEN_MOBILE, {
         expiresIn: "15min",
       });
       const data = {
