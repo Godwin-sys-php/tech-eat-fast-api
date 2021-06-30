@@ -218,21 +218,22 @@ exports.payCommand = async (req, res) => {
       const data = {
         PayType: "MaxiCash",
         Amount: "500",
-        Currency: "maxiDollar",
+        Currency: "USD",
         Telephone: "0814461960",
         Email: "godwinnyembo2@gmail.com",
         MerchantID: "43fbc30291724be4bababf888a974c63",
         MerchantPassword: "450108b811294b03aca56a2ec560236d",
         Language: "Fr",
         Reference: "LOLCAT",
-        accepturl: `${req.protocol}://${req.get("host")}/commands/${data.idCommand}/payConfirmCommand?action=accept`,
-        declineurl: `${req.protocol}://${req.get("host")}/commands/${data.idCommand}/payConfirmCommand?action=decline`,
-        cancelurl: `${req.protocol}://${req.get("host")}/commands/${data.idCommand}/payConfirmCommand?action=cancel`,
+        accepturl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=accept`,
+        declineurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=decline`,
+        cancelurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=cancel`,
         notifyurl: ``,
       };
       return res.render('pay', data);
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: true });
   }
 }
