@@ -6,6 +6,9 @@ const moment = require('moment');
 const calculateSum = require('../Helpers/calculateSum');
 const createDishesTable = require('../Helpers/createDishesTable');
 const fetch = require('node-fetch');
+const jwt = require('jsonwebtoken');
+
+require('dotenv').config();
 
 exports.addCommand = async (req, res) => {
   try {
@@ -215,6 +218,9 @@ exports.payCommand = async (req, res) => {
     if (data.payed) {
       return res.render('alreadyPayed');
     } else {
+      const token = jwt.sign({ idCommand: req.params.idCommand }, process.env.TOKEN, {
+        expiresIn: "15min",
+      });
       const data = {
         PayType: "MaxiCash",
         Amount: "500",
@@ -225,9 +231,9 @@ exports.payCommand = async (req, res) => {
         MerchantPassword: "450108b811294b03aca56a2ec560236d",
         Language: "Fr",
         Reference: "LOLCAT",
-        accepturl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=accept`,
-        declineurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=decline`,
-        cancelurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=cancel`,
+        accepturl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=accept&token=${token}`,
+        declineurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=decline${token}`,
+        cancelurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=cancel${token}`,
         notifyurl: ``,
       };
       return res.render('pay', data);
