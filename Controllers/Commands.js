@@ -236,7 +236,7 @@ exports.payCommand = async (req, res) => {
         cancelurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=cancel&token=${token}`,
         notifyurl: ``,
       };
-      return res.render('pay', data);
+      return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('pay', data);
     }
   } catch (error) {
     console.log(error);
@@ -249,11 +249,11 @@ exports.payConfirmCommand = async (req, res) => {
     switch (req.query.action) {
       case 'accept':
         await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
-        return res.render('accept');
+        return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('accept');
       case 'decline':
-        return res.render('decline');
+        return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('decline');
       case 'cancel':
-        return res.render('cancel');
+        return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('cancel');
     }
   } catch (error) {
     res.status(500).json({ error: true });
