@@ -19,12 +19,12 @@ module.exports = (req, res, next) => {
           }
         })
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     } else {
       res.status(400).json({ invalidToken: true });
     }
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 };

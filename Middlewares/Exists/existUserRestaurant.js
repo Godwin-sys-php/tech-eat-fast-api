@@ -15,13 +15,13 @@ module.exports = (req, res, next) => {
             }
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       } else {
         res.status(404).json({ userNotFound: true });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 }

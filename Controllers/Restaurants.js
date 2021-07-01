@@ -24,12 +24,12 @@ exports.updateRestaurant = (req, res) => {
           })
           .catch(error => {
             console.log(error);
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       })
       .catch(error => {
         console.log(error);
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   } else {
     const toSet = {
@@ -43,7 +43,7 @@ exports.updateRestaurant = (req, res) => {
         res.status(200).json({ update: true });
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   }
 };
@@ -57,7 +57,7 @@ exports.getOneRestaurant = async (req, res) => {
 
     res.status(200).json({ find: true, result: {...resto[0], paymentMethodAccept: finalPm} });
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 };
 
@@ -67,7 +67,7 @@ exports.getAllRestaurant = (req, res) => {
       res.status(200).json({ find: true, result: resto })
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -96,7 +96,7 @@ exports.getOneRestaurantWithMenus = async (req, res) => {
 
     res.status(200).json({ find: true, result: {restoInfo: restoInfo, menus: newMenus} });
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 }
 
@@ -108,7 +108,7 @@ exports.searchOneRestaurant = async (req, res) => {
 
     res.status(200).json({ find: true, result: restaurants, query: req.query.query });
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 }
 
@@ -124,7 +124,7 @@ exports.getAllRestaurantWithType = async (req, res) => {
 
     res.status(200).json({ find: true, result: response });
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 }
 

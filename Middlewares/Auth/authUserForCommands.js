@@ -25,7 +25,7 @@ module.exports = (req, res, next) => {
             }
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       }
     } else {
@@ -34,6 +34,6 @@ module.exports = (req, res, next) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 };

@@ -22,7 +22,7 @@ module.exports = (req, res, next) => {
                   menu.idRestaurant == decodedToken.idRestaurant ? next() : res.status(403).json({ invalidToken: true });
                 })
                 .catch(error => {
-                  res.status(500).json({ error: true, errorMessage: error });
+                  res.status(500).json({ error: true,  });
                 });
             } else if (req.params.idRestaurant) {
               req.params.idRestaurant == decodedToken.idRestaurant ? next() : res.status(403).json({ invalidToken: true });
@@ -32,7 +32,7 @@ module.exports = (req, res, next) => {
                   dish.idRestaurant == decodedToken.idRestaurant ? next() : res.status(403).json({ invalidToken: true });
                 })
                 .catch(error => {
-                  res.status(500).json({ error: true, errorMessage: error });
+                  res.status(500).json({ error: true,  });
                 });
             } else {
               next();
@@ -43,9 +43,9 @@ module.exports = (req, res, next) => {
         }
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 };

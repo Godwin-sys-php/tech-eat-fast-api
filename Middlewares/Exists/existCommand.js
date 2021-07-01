@@ -2,7 +2,7 @@ const Commands = require('../../Models/Commands');
 const Resto = require('../../Models/Restaurants');
 
 module.exports = (req, res, next) => {
-  Commands.findOne({ idCommand: req.params.idCommand })
+  Commands.findOne({ idCommand: req.params.idCommand, payed: true })
     .then(command => {
       if (command) {
         Resto.findOne({ idRestaurant: command.idRestaurant })
@@ -14,13 +14,13 @@ module.exports = (req, res, next) => {
             }
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       } else {
         res.status(404).json({ commandNotFound: true });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 }

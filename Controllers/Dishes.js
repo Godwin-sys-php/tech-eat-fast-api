@@ -39,14 +39,14 @@ exports.addDish = async (req, res) => {
                 console.log('====================================');
                 console.log(error);
                 console.log('====================================');
-                res.status(500).json({ error: true, errorMessage: error });
+                res.status(500).json({ error: true,  });
               });
           })
           .catch(error => {
             console.log('====================================');
             console.log(error);
             console.log('====================================');
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       } else {
         for (let index in req.arrFormat) {
@@ -60,7 +60,7 @@ exports.addDish = async (req, res) => {
             console.log('====================================');
             console.log(error);
             console.log('====================================');
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       }
     })
@@ -68,7 +68,7 @@ exports.addDish = async (req, res) => {
       console.log('====================================');
       console.log(error);
       console.log('====================================');
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -119,14 +119,14 @@ exports.updateDish = (req, res) => {
                                           console.log('====================================');
                                           console.log(error);
                                           console.log('====================================');
-                                          res.status(500).json({ error: true, errorMessage: error });
+                                          res.status(500).json({ error: true,  });
                                         });
                                     })
                                     .catch((error) => {
                                       console.log('====================================');
                                       console.log(error);
                                       console.log('====================================');
-                                      res.status(500).json({ error: true, errorMessage: error });
+                                      res.status(500).json({ error: true,  });
                                     });
                                 } else {
                                   res.status(200).json({ update: true });
@@ -136,21 +136,21 @@ exports.updateDish = (req, res) => {
                                 console.log('====================================');
                                 console.log(error);
                                 console.log('====================================');
-                                res.status(500).json({ error: true, errorMessage: error });
+                                res.status(500).json({ error: true,  });
                               });
                           })
                           .catch(error => {
                             console.log('====================================');
                             console.log(error);
                             console.log('====================================');
-                            res.status(500).json({ error: true, errorMessage: error });
+                            res.status(500).json({ error: true,  });
                           });
                       })
                       .catch((error) => {
                         console.log('====================================');
                         console.log(error);
                         console.log('====================================');
-                        res.status(500).json({ error: true, errorMessage: error });
+                        res.status(500).json({ error: true,  });
                       });
                   } else {
                     res.status(200).json({ update: true });
@@ -160,7 +160,7 @@ exports.updateDish = (req, res) => {
                   console.log('====================================');
                   console.log(error);
                   console.log('====================================');
-                  res.status(500).json({ error: true, errorMessage: error });
+                  res.status(500).json({ error: true,  });
                 });
             } else {
               Dishes.customQuery('SELECT * FROM dishIngredients WHERE idDish= ?', [req.params.idDish])
@@ -176,27 +176,27 @@ exports.updateDish = (req, res) => {
                             res.status(201).json({ update: true });
                           })
                           .catch(error => {
-                            res.status(500).json({ error: true, errorMessage: error });
+                            res.status(500).json({ error: true,  });
                           });
                       })
                       .catch((error) => {
-                        res.status(500).json({ error: true, errorMessage: error });
+                        res.status(500).json({ error: true,  });
                       });
                   } else {
                     res.status(200).json({ update: true });
                   }
                 })
                 .catch((error) => {
-                  res.status(500).json({ error: true, errorMessage: error });
+                  res.status(500).json({ error: true,  });
                 });
             }
           })
           .catch((error) => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       })
       .catch((error) => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   } else {
     const toSet = {
@@ -232,33 +232,33 @@ exports.updateDish = (req, res) => {
                                       res.status(201).json({ update: true });
                                     })
                                     .catch(error => {
-                                      res.status(500).json({ error: true, errorMessage: error });
+                                      res.status(500).json({ error: true,  });
                                     });
                                 })
                                 .catch((error) => {
-                                  res.status(500).json({ error: true, errorMessage: error });
+                                  res.status(500).json({ error: true,  });
                                 });
                             } else {
                               res.status(200).json({ update: true });
                             }
                           })
                           .catch((error) => {
-                            res.status(500).json({ error: true, errorMessage: error });
+                            res.status(500).json({ error: true,  });
                           });
                       })
                       .catch(error => {
-                        res.status(500).json({ error: true, errorMessage: error });
+                        res.status(500).json({ error: true,  });
                       });
                   })
                   .catch((error) => {
-                    res.status(500).json({ error: true, errorMessage: error });
+                    res.status(500).json({ error: true,  });
                   });
               } else {
                 res.status(200).json({ update: true });
               }
             })
             .catch((error) => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         } else {
           Dishes.customQuery('SELECT * FROM dishIngredients WHERE idDish= ?', [req.params.idDish])
@@ -274,23 +274,23 @@ exports.updateDish = (req, res) => {
                         res.status(201).json({ update: true });
                       })
                       .catch(error => {
-                        res.status(500).json({ error: true, errorMessage: error });
+                        res.status(500).json({ error: true,  });
                       });
                   })
                   .catch((error) => {
-                    res.status(500).json({ error: true, errorMessage: error });
+                    res.status(500).json({ error: true,  });
                   });
               } else {
                 res.status(200).json({ update: true });
               }
             })
             .catch((error) => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         }
       })
       .catch((error) => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   }
 };
@@ -303,11 +303,11 @@ exports.toogleDish = (req, res) => {
           res.status(200).json({ update: true });
         })
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -322,7 +322,7 @@ exports.getFromMenu = (req, res) => {
               response.push({ ...dishes[index], options: options });
             })
             .catch(error => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         }
         res.status(200).json({ find: true, result: response });
@@ -331,7 +331,7 @@ exports.getFromMenu = (req, res) => {
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -352,11 +352,11 @@ exports.getFromRestaurant = async (req, res) => {
                   response.push({ ...dishes[index], options: options, ingredients: ingredients });
                 })
                 .catch(error => {
-                  res.status(500).json({ error: true, errorMessage: error });
+                  res.status(500).json({ error: true,  });
                 });
             })
             .catch(error => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         }
         res.status(200).json({ find: true, result: response });
@@ -365,7 +365,7 @@ exports.getFromRestaurant = async (req, res) => {
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 }
 
@@ -383,15 +383,15 @@ exports.getOneDish = (req, res) => {
               res.status(200).json({ find: true, result: { ...dish, options: options, ingredients: ingredients } });
             })
             .catch(error => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         })
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -405,7 +405,7 @@ exports.getOneOption = (req, res) => {
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 }
 
@@ -430,11 +430,11 @@ exports.deleteOneDish = (req, res) => {
               res.status(200).json({ delete: true });
             })
             .catch(error => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         })
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
 }

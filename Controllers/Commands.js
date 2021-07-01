@@ -97,7 +97,7 @@ exports.addCommand = async (req, res) => {
               res.status(201).json({ create: true, insertId: insertId });
             })
             .catch(error => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         })
         .catch(() => {
@@ -199,7 +199,7 @@ exports.addCommandAndPay = async (req, res) => {
               res.status(201).json({ create: true, insertId: insertId });
             })
             .catch(error => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         })
         .catch(() => {
@@ -251,8 +251,10 @@ exports.payConfirmCommand = async (req, res) => {
         await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
         return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('accept');
       case 'decline':
+        await Commands.delete({ idCommand: req.params.idCommand });
         return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('decline');
       case 'cancel':
+        await Commands.delete({ idCommand: req.params.idCommand });
         return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('cancel');
     }
   } catch (error) {
@@ -423,7 +425,7 @@ exports.setDone = async (req, res) => {
 exports.getNotDoneCommand = async (req, res) => {
   try {
     console.log(req);
-    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND status != "done" ORDER BY lastUpdate DESC', [req.params.idRestaurant]);
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND status != "done" AND payed = 1 ORDER BY lastUpdate DESC', [req.params.idRestaurant]);
     let response = [];
 
     for (let index in commands) {
@@ -440,7 +442,7 @@ exports.getNotDoneCommand = async (req, res) => {
 
 exports.getOneCommand = async (req, res) => {
   try {
-    const command = await Commands.findOne({ idCommand: req.params.idCommand });
+    const command = await Commands.findOne({ idCommand: req.params.idCommand, payed : true });
 
     const commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [req.params.idCommand]);
 
@@ -461,7 +463,7 @@ exports.getOneCommand = async (req, res) => {
 
 exports.getOneCommandNotConnected = async (req, res) => {
   try {
-    const command = await Commands.findOne({ idCommand: req.params.idCommand });
+    const command = await Commands.findOne({ idCommand: req.params.idCommand, payed: true });
 
     const commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [req.params.idCommand]);
 
@@ -486,7 +488,7 @@ exports.getOneCommandNotConnected = async (req, res) => {
 
 exports.getCommandOfRestaurantWithTimestamp = async (req, res) => {
   try {
-    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND creationDate > ? AND creationDate <= ? ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND creationDate > ? AND creationDate <= ? AND payed = 1 ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.begin, req.params.end]);
     let response = [];
 
     for (let index in commands) {
@@ -504,19 +506,19 @@ exports.getCommandOfRestaurantWithTimestamp = async (req, res) => {
 exports.getOneDayReport = async (req, res) => {
   try {
     // Recette
-    const recipe = await Commands.customQuery('SELECT SUM(total) as recipe FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ?', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const recipe = await Commands.customQuery('SELECT SUM(total) as recipe FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND payed = 1', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
 
     // Nombre de plâts vendu
-    const nbrDishesSell = await Commands.customQuery('SELECT COUNT(ci.idCommandItem) as nbrDishesSell FROM commands c JOIN commandItems ci ON ci.idCommand = c.idCommand WHERE c.idRestaurant = ? AND c.lastUpdate > ? AND c.lastUpdate <= ?', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const nbrDishesSell = await Commands.customQuery('SELECT COUNT(ci.idCommandItem) as nbrDishesSell FROM commands c JOIN commandItems ci ON ci.idCommand = c.idCommand WHERE c.idRestaurant = ? AND c.lastUpdate > ? AND c.lastUpdate <= ? AND payed = 1', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
 
     // Nombre de commande "toTake"
-    const nbrToTakeCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToTakeCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toTake"', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const nbrToTakeCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToTakeCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toTake" AND payed = 1', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
 
     // Nombre de commande "toDelive"
-    const nbrToDeliveCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToDeliveCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toDelive"', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const nbrToDeliveCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToDeliveCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toDelive" AND payed = 1', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
 
     // Commandes
-    const command = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const command = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND payed = 1 ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
     let commands = [];
 
     for (let index in command) {
@@ -534,19 +536,19 @@ exports.getOneDayReport = async (req, res) => {
 exports.getPeriodReport = async (req, res) => {
   try {
     // Recette
-    const recipe = await Commands.customQuery('SELECT SUM(total) as recipe FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ?', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const recipe = await Commands.customQuery('SELECT SUM(total) as recipe FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND payed = 1', [req.params.idRestaurant, req.params.begin, req.params.end]);
 
     // Nombre de plâts vendu
-    const nbrDishesSell = await Commands.customQuery('SELECT COUNT(ci.idCommandItem) as nbrDishesSell FROM commands c JOIN commandItems ci ON ci.idCommand = c.idCommand WHERE c.idRestaurant = ? AND c.lastUpdate > ? AND c.lastUpdate <= ?', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const nbrDishesSell = await Commands.customQuery('SELECT COUNT(ci.idCommandItem) as nbrDishesSell FROM commands c JOIN commandItems ci ON ci.idCommand = c.idCommand WHERE c.idRestaurant = ? AND c.lastUpdate > ? AND c.lastUpdate <= ? AND payed = 1', [req.params.idRestaurant, req.params.begin, req.params.end]);
 
     // Nombre de commande "toTake"
-    const nbrToTakeCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToTakeCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toTake"', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const nbrToTakeCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToTakeCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toTake" AND payed = 1', [req.params.idRestaurant, req.params.begin, req.params.end]);
 
     // Nombre de commande "toDelive"
-    const nbrToDeliveCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToDeliveCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toDelive"', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const nbrToDeliveCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToDeliveCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toDelive" AND payed = 1', [req.params.idRestaurant, req.params.begin, req.params.end]);
 
     // Commandes
-    const command = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const command = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND payed = 1 ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.begin, req.params.end]);
     let commands = [];
 
     for (let index in command) {

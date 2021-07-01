@@ -26,11 +26,11 @@ exports.signup = (req, res) => {
       Users.insertOne(toInsert)
         .then(() => res.status(201).json({ create: true }))
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -57,12 +57,12 @@ exports.login = (req, res) => {
             }
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -83,12 +83,12 @@ exports.loginNoJwt = (req, res) => {
             }
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -106,11 +106,11 @@ exports.addAddress = (req, res) => {
           res.status(201).json({ create: true, address: address })
         })
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -127,11 +127,11 @@ exports.addPhoneNumber = (req, res) => {
           res.status(201).json({ create: true, phoneNumbers: phoneNumbers })
         })
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -242,11 +242,11 @@ exports.updateOneUser = (req, res) => {
             res.status(200).json({ update: true });
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   } else {
     toSet = {
@@ -259,7 +259,7 @@ exports.updateOneUser = (req, res) => {
         res.status(200).json({ update: true });
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   }
 };
@@ -281,12 +281,12 @@ exports.changePDP = (req, res) => {
         })
         .catch(error => {
           console.log(error);
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
     .catch(error => {
       console.log(error);
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 }
 
@@ -304,11 +304,11 @@ exports.updateAddress = (req, res) => {
           res.status(201).json({ update: true, address: address })
         })
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
   } else {
     res.status(400).json({ invalidToken: true });
@@ -328,11 +328,11 @@ exports.updatePhoneNumber = (req, res) => {
             res.status(201).json({ update: true, phoneNumbers: phoneNumbers })
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   } else {
     res.status(400).json({  invalidToken: true  });
@@ -347,7 +347,7 @@ exports.getOneUser = async (req, res) => {
 
     res.status(200).json({ find: true, result: { ...users, phoneNumbers: phoneNumbers, address: address, password: null, } });
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 };
 
@@ -430,7 +430,7 @@ exports.getAllAddress = (req, res) => {
       res.status(200).json({ find: true, result: address, });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -440,7 +440,7 @@ exports.getAllPhoneNumber = (req, res) => {
       res.status(200).json({ find: true, result: phoneNumber, });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -459,7 +459,7 @@ exports.deleteOneUser = (req, res) => {
       res.status(200).json({ delete: true });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -472,11 +472,11 @@ exports.deleteOneAddress = (req, res) => {
             res.status(201).json({ delete: true, address: address })
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   } else {
     res.status(400).json({ invalidToken: true });
@@ -492,11 +492,11 @@ exports.deleteOnePhoneNumber = (req, res) => {
             res.status(201).json({ delete: true, phoneNumbers: phoneNumbers })
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });;
   } else {
     res.status(400).json({ invalidToken: true });

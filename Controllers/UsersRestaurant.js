@@ -27,12 +27,12 @@ exports.login = (req, res) => {
           })
           .catch(error => {
             console.log(error);
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -52,11 +52,11 @@ exports.addOneUser = (req, res) => {
       UsersRestaurant.insertOne(toInsert)
         .then(res.status(201).json({ create: true }))
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -76,11 +76,11 @@ exports.updateOneUser = (req, res) => {
             res.status(200).json({ update: true });
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   } else {
     toSet = {
@@ -93,7 +93,7 @@ exports.updateOneUser = (req, res) => {
         res.status(200).json({ update: true });
       })
       .catch(error => {
-        res.status(500).json({ error: true, errorMessage: error });
+        res.status(500).json({ error: true,  });
       });
   }
 };
@@ -104,7 +104,7 @@ exports.getOneUser = (req, res) => {
       res.status(200).json({ find: true, result: {...user, password: null} });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -114,7 +114,7 @@ exports.getAllUser = (req, res) => {
       res.status(200).json({ find: true, result: users });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -129,11 +129,11 @@ exports.deleteOneUser = (req, res) => {
             res.status(200).json({ delete: true });
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };

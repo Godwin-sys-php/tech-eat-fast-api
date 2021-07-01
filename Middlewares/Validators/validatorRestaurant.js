@@ -12,12 +12,12 @@ module.exports = (req, res, next) => {
           resto.length > 0 ? res.status(400).json({ existName: true }) : next();
         })
         .catch(error => {
-          res.status(500).json({ error: true, errorMessage: error });
+          res.status(500).json({ error: true,  });
         });
     } else {
       res.status(400).json({ invalidForm: true });
     }
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 };

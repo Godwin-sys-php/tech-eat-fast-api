@@ -33,14 +33,14 @@ module.exports = (req, res, next) => {
                     }
                   })
                   .catch(error => {
-                    res.status(500).json({ error: true, errorMessage: error });
+                    res.status(500).json({ error: true,  });
                   });
               } else {
                 res.status(400).json({ existEmail: true });
               }
             })
             .catch(error => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         } else {
           res.status(400).json({ invalidForm: true });
@@ -59,14 +59,14 @@ module.exports = (req, res, next) => {
                     }
                   })
                   .catch(error => {
-                    res.status(500).json({ error: true, errorMessage: error });
+                    res.status(500).json({ error: true,  });
                   });
               } else {
                 res.status(400).json({ existEmail: true });
               }
             })
             .catch(error => {
-              res.status(500).json({ error: true, errorMessage: error });
+              res.status(500).json({ error: true,  });
             });
         } else {
           res.status(400).json({ invalidForm: true });
@@ -80,13 +80,13 @@ module.exports = (req, res, next) => {
             !user ? next() : res.status(400).json({ existEmail: true });
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       } else {
         res.status(400).json({ invalidForm: true });
       }
     }
   } catch (error) {
-    res.status(500).json({ error: true, errorMessage: error });
+    res.status(500).json({ error: true,  });
   }
 };

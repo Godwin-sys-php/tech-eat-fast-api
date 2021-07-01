@@ -15,7 +15,7 @@ exports.addMenu = (req, res) => {
       res.status(201).json({ create: true })
     })
     .catch((error) => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -29,7 +29,7 @@ exports.updateMenu = (req, res) => {
       res.status(200).json({ update: true });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -39,7 +39,7 @@ exports.getMenuOfResto = (req, res) => {
       res.status(200).json({ find: true, result: menus });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 }
 
@@ -49,7 +49,7 @@ exports.getOneMenu = (req, res) => {
       res.status(200).json({ find: true, result: menu });
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
 
@@ -66,15 +66,15 @@ exports.deleteOneMenu = (req, res) => {
                 res.status(200).json({ delete: true });
               })
               .catch(error => {
-                res.status(500).json({ error: true, errorMessage: error });
+                res.status(500).json({ error: true,  });
               });
           })
           .catch(error => {
-            res.status(500).json({ error: true, errorMessage: error });
+            res.status(500).json({ error: true,  });
           });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true, errorMessage: error });
+      res.status(500).json({ error: true,  });
     });
 };
