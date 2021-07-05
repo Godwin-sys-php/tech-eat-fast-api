@@ -1,7 +1,7 @@
 const Commands = require("../Models/Commands");
 const Restaurants = require("../Models/Restaurants");
 const Dishes = require("../Models/Dishes");
-const { v4: uuidv4 } = require('uuid');
+const short = require('short-uuid')();
 const moment = require('moment');
 const calculateSum = require('../Helpers/calculateSum');
 const createDishesTable = require('../Helpers/createDishesTable');
@@ -22,7 +22,7 @@ exports.addCommand = async (req, res) => {
       let toInsertCommand = {
         idRestaurant: req.params.idRestaurant,
         idUser: req.user.idUser,
-        orderId: uuidv4(),
+        orderId: short.new(),
         pushToken: req.body.pushToken ? req.body.pushToken : null,
         nameOfClient: req.user.name,
         emailOfClient: req.user.email,
@@ -68,7 +68,7 @@ exports.addCommand = async (req, res) => {
       let toInsertCommand = {
         idRestaurant: req.params.idRestaurant,
         idUser: null,
-        orderId: uuidv4(),
+        orderId: short.new(),
         nameOfClient: req.body.name,
         deviceId: req.body.deviceId,
         pushToken: req.body.pushToken ? req.body.pushToken : null,
