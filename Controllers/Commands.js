@@ -110,157 +110,155 @@ exports.addCommand = async (req, res) => {
   }
 }
 
-exports.addCommandAndPay = async (req, res) => {
-  try {
-    if (req.haveToken) {
-      const now = moment();
+// exports.addCommandAndPay = async (req, res) => {
+//   try {
+//     if (req.haveToken) {
+//       const now = moment();
 
-      const dishes = req.body.dishes;
+//       const dishes = req.body.dishes;
 
-      const total = await calculateSum(dishes);
+//       const total = await calculateSum(dishes);
 
-      let toInsertCommand = {
-        idRestaurant: req.params.idRestaurant,
-        idUser: req.user.idUser,
-        orderId: uuidv4(),
-        pushToken: req.body.pushToken ? req.body.pushToken : null,
-        nameOfClient: req.user.name,
-        emailOfClient: req.user.email,
-        phoneNumberOfClient: req.body.phoneNumber,
-        address: req.body.type === "toTake" ? null : req.body.address,
-        reference: req.body.reference ? req.body.reference : null,
-        comment: req.body.comment,
-        type: req.body.type,
-        creationDate: now.unix(),
-        lastUpdate: now.unix(),
-        total: total,
-        paymentMethod: req.body.paymentMethod,
-        accept: null,
-        status: "inLoading",
-        payed: true,
-      };
+//       let toInsertCommand = {
+//         idRestaurant: req.params.idRestaurant,
+//         idUser: req.user.idUser,
+//         orderId: uuidv4(),
+//         pushToken: req.body.pushToken ? req.body.pushToken : null,
+//         nameOfClient: req.user.name,
+//         emailOfClient: req.user.email,
+//         phoneNumberOfClient: req.body.phoneNumber,
+//         address: req.body.type === "toTake" ? null : req.body.address,
+//         reference: req.body.reference ? req.body.reference : null,
+//         comment: req.body.comment,
+//         type: req.body.type,
+//         creationDate: now.unix(),
+//         lastUpdate: now.unix(),
+//         total: total,
+//         paymentMethod: req.body.paymentMethod,
+//         accept: null,
+//         status: "inLoading",
+//       };
 
-      Commands.insertOne(toInsertCommand)
-        .then(async result => {
-          const insertId = result.insertId;
+//       Commands.insertOne(toInsertCommand)
+//         .then(async result => {
+//           const insertId = result.insertId;
 
-          try {
-            const commandItems = await createDishesTable(dishes, insertId);
-            await Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
-              .then(async (result) => {
-                return res.status(201).json({ create: true, insertId: insertId });
-              })
-              .catch(error => {
-                return res.status(500).json({ error: true, });
-              });
-          } catch (error) {
-            return res.status(500).json({ error: true });
-          }
-        })
-        .catch((error) => {
-          return res.status(500).json({ error: true });
-        });
-    } else {
-      const now = moment();
+//           try {
+//             const commandItems = await createDishesTable(dishes, insertId);
+//             await Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
+//               .then(async (result) => {
+//                 return res.status(201).json({ create: true, insertId: insertId });
+//               })
+//               .catch(error => {
+//                 return res.status(500).json({ error: true, });
+//               });
+//           } catch (error) {
+//             return res.status(500).json({ error: true });
+//           }
+//         })
+//         .catch((error) => {
+//           return res.status(500).json({ error: true });
+//         });
+//     } else {
+//       const now = moment();
 
-      const dishes = req.body.dishes;
-      const total = await calculateSum(dishes);
+//       const dishes = req.body.dishes;
+//       const total = await calculateSum(dishes);
 
-      let toInsertCommand = {
-        idRestaurant: req.params.idRestaurant,
-        idUser: null,
-        orderId: uuidv4(),
-        nameOfClient: req.body.name,
-        deviceId: req.body.deviceId,
-        pushToken: req.body.pushToken ? req.body.pushToken : null,
-        emailOfClient: null,
-        phoneNumberOfClient: req.body.phoneNumber,
-        address: req.body.type === "toTake" ? null : req.body.address,
-        reference: req.body.reference ? req.body.reference : null,
-        comment: req.body.comment,
-        type: req.body.type,
-        creationDate: now.unix(),
-        lastUpdate: now.unix(),
-        total: total,
-        paymentMethod: req.body.paymentMethod,
-        accept: null,
-        status: "inLoading",
-        payed: true,
-      };
+//       let toInsertCommand = {
+//         idRestaurant: req.params.idRestaurant,
+//         idUser: null,
+//         orderId: uuidv4(),
+//         nameOfClient: req.body.name,
+//         deviceId: req.body.deviceId,
+//         pushToken: req.body.pushToken ? req.body.pushToken : null,
+//         emailOfClient: null,
+//         phoneNumberOfClient: req.body.phoneNumber,
+//         address: req.body.type === "toTake" ? null : req.body.address,
+//         reference: req.body.reference ? req.body.reference : null,
+//         comment: req.body.comment,
+//         type: req.body.type,
+//         creationDate: now.unix(),
+//         lastUpdate: now.unix(),
+//         total: total,
+//         paymentMethod: req.body.paymentMethod,
+//         accept: null,
+//         status: "inLoading",
+//       };
 
-      Commands.insertOne(toInsertCommand)
-        .then(async result => {
-          const insertId = result.insertId;
-          console.log(dishes);
-          const commandItems = await createDishesTable(dishes, insertId);
+//       Commands.insertOne(toInsertCommand)
+//         .then(async result => {
+//           const insertId = result.insertId;
+//           console.log(dishes);
+//           const commandItems = await createDishesTable(dishes, insertId);
 
-          Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
-            .then(() => {
-              res.status(201).json({ create: true, insertId: insertId });
-            })
-            .catch(error => {
-              res.status(500).json({ error: true,  });
-            });
-        })
-        .catch(() => {
-          res.status(500).json({ error: true });
-        });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: true });
-  }
-}
+//           Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
+//             .then(() => {
+//               res.status(201).json({ create: true, insertId: insertId });
+//             })
+//             .catch(error => {
+//               res.status(500).json({ error: true,  });
+//             });
+//         })
+//         .catch(() => {
+//           res.status(500).json({ error: true });
+//         });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: true });
+//   }
+// }
 
-exports.payCommand = async (req, res) => {
-  try {
-    const data = await Commands.findOne({ idCommand: req.params.idCommand });
-    if (data.payed) {
-      return res.render('alreadyPayed');
-    } else {
-      const token = jwt.sign({ idCommand: req.params.idCommand }, process.env.TOKEN_MOBILE, {
-        expiresIn: "15min",
-      });
-      const data = {
-        PayType: "MaxiCash",
-        Amount: "500",
-        Currency: "USD",
-        Telephone: "0814461960",
-        Email: "godwinnyembo2@gmail.com",
-        MerchantID: "43fbc30291724be4bababf888a974c63",
-        MerchantPassword: "450108b811294b03aca56a2ec560236d",
-        Language: "Fr",
-        Reference: "LOLCAT",
-        accepturl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=accept&token=${token}`,
-        declineurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=decline&token=${token}`,
-        cancelurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=cancel&token=${token}`,
-        notifyurl: ``,
-      };
-      return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('pay', data);
-    }
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: true });
-  }
-}
+// exports.payCommand = async (req, res) => {
+//   try {
+//     const data = await Commands.findOne({ idCommand: req.params.idCommand });
+//     if (data.payed) {
+//       return res.render('alreadyPayed');
+//     } else {
+//       const token = jwt.sign({ idCommand: req.params.idCommand }, process.env.TOKEN_MOBILE, {
+//         expiresIn: "15min",
+//       });
+//       const data = {
+//         PayType: "MaxiCash",
+//         Amount: "500",
+//         Currency: "USD",
+//         Telephone: "0814461960",
+//         Email: "godwinnyembo2@gmail.com",
+//         MerchantID: "43fbc30291724be4bababf888a974c63",
+//         MerchantPassword: "450108b811294b03aca56a2ec560236d",
+//         Language: "Fr",
+//         Reference: "LOLCAT",
+//         accepturl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=accept&token=${token}`,
+//         declineurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=decline&token=${token}`,
+//         cancelurl: `${req.protocol}://${req.get("host")}/commands/${req.params.idCommand}/payConfirm?action=cancel&token=${token}`,
+//         notifyurl: ``,
+//       };
+//       return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('pay', data);
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({ error: true });
+//   }
+// }
 
-exports.payConfirmCommand = async (req, res) => {
-  try {
-    switch (req.query.action) {
-      case 'accept':
-        await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
-        return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('accept');
-      case 'decline':
-        await Commands.delete({ idCommand: req.params.idCommand });
-        return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('decline');
-      case 'cancel':
-        await Commands.delete({ idCommand: req.params.idCommand });
-        return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('cancel');
-    }
-  } catch (error) {
-    res.status(500).json({ error: true });
-  }
-}
+// exports.payConfirmCommand = async (req, res) => {
+//   try {
+//     switch (req.query.action) {
+//       case 'accept':
+//         await Commands.updateOne({ payed: true }, { idCommand: req.params.idCommand });
+//         return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('accept');
+//       case 'decline':
+//         await Commands.delete({ idCommand: req.params.idCommand });
+//         return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('decline');
+//       case 'cancel':
+//         await Commands.delete({ idCommand: req.params.idCommand });
+//         return res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'").render('cancel');
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: true });
+//   }
+// }
 
 exports.acceptCommand = async (req, res) => {
   try {
@@ -425,7 +423,7 @@ exports.setDone = async (req, res) => {
 exports.getNotDoneCommand = async (req, res) => {
   try {
     console.log(req);
-    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND status != "done" AND payed = 1 ORDER BY lastUpdate DESC', [req.params.idRestaurant]);
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND status != "done" ORDER BY lastUpdate DESC', [req.params.idRestaurant]);
     let response = [];
 
     for (let index in commands) {
@@ -442,7 +440,7 @@ exports.getNotDoneCommand = async (req, res) => {
 
 exports.getOneCommand = async (req, res) => {
   try {
-    const command = await Commands.findOne({ idCommand: req.params.idCommand, payed : true });
+    const command = await Commands.findOne({ idCommand: req.params.idCommand });
 
     const commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [req.params.idCommand]);
 
@@ -463,7 +461,7 @@ exports.getOneCommand = async (req, res) => {
 
 exports.getOneCommandNotConnected = async (req, res) => {
   try {
-    const command = await Commands.findOne({ idCommand: req.params.idCommand, payed: true });
+    const command = await Commands.findOne({ idCommand: req.params.idCommand });
 
     const commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [req.params.idCommand]);
 
@@ -488,7 +486,7 @@ exports.getOneCommandNotConnected = async (req, res) => {
 
 exports.getCommandOfRestaurantWithTimestamp = async (req, res) => {
   try {
-    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND creationDate > ? AND creationDate <= ? AND payed = 1 ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND creationDate > ? AND creationDate <= ? ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.begin, req.params.end]);
     let response = [];
 
     for (let index in commands) {
@@ -506,19 +504,19 @@ exports.getCommandOfRestaurantWithTimestamp = async (req, res) => {
 exports.getOneDayReport = async (req, res) => {
   try {
     // Recette
-    const recipe = await Commands.customQuery('SELECT SUM(total) as recipe FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND payed = 1', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const recipe = await Commands.customQuery('SELECT SUM(total) as recipe FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ?', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
 
     // Nombre de plâts vendu
-    const nbrDishesSell = await Commands.customQuery('SELECT COUNT(ci.idCommandItem) as nbrDishesSell FROM commands c JOIN commandItems ci ON ci.idCommand = c.idCommand WHERE c.idRestaurant = ? AND c.lastUpdate > ? AND c.lastUpdate <= ? AND payed = 1', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const nbrDishesSell = await Commands.customQuery('SELECT COUNT(ci.idCommandItem) as nbrDishesSell FROM commands c JOIN commandItems ci ON ci.idCommand = c.idCommand WHERE c.idRestaurant = ? AND c.lastUpdate > ? AND c.lastUpdate <= ?', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
 
     // Nombre de commande "toTake"
-    const nbrToTakeCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToTakeCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toTake" AND payed = 1', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const nbrToTakeCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToTakeCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toTake"', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
 
     // Nombre de commande "toDelive"
-    const nbrToDeliveCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToDeliveCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toDelive" AND payed = 1', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const nbrToDeliveCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToDeliveCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toDelive"', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
 
     // Commandes
-    const command = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND payed = 1 ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
+    const command = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.timestamp, Number(req.params.timestamp) + 86400]);
     let commands = [];
 
     for (let index in command) {
@@ -536,19 +534,19 @@ exports.getOneDayReport = async (req, res) => {
 exports.getPeriodReport = async (req, res) => {
   try {
     // Recette
-    const recipe = await Commands.customQuery('SELECT SUM(total) as recipe FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND payed = 1', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const recipe = await Commands.customQuery('SELECT SUM(total) as recipe FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ?', [req.params.idRestaurant, req.params.begin, req.params.end]);
 
     // Nombre de plâts vendu
-    const nbrDishesSell = await Commands.customQuery('SELECT COUNT(ci.idCommandItem) as nbrDishesSell FROM commands c JOIN commandItems ci ON ci.idCommand = c.idCommand WHERE c.idRestaurant = ? AND c.lastUpdate > ? AND c.lastUpdate <= ? AND payed = 1', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const nbrDishesSell = await Commands.customQuery('SELECT COUNT(ci.idCommandItem) as nbrDishesSell FROM commands c JOIN commandItems ci ON ci.idCommand = c.idCommand WHERE c.idRestaurant = ? AND c.lastUpdate > ? AND c.lastUpdate <= ?', [req.params.idRestaurant, req.params.begin, req.params.end]);
 
     // Nombre de commande "toTake"
-    const nbrToTakeCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToTakeCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toTake" AND payed = 1', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const nbrToTakeCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToTakeCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toTake"', [req.params.idRestaurant, req.params.begin, req.params.end]);
 
     // Nombre de commande "toDelive"
-    const nbrToDeliveCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToDeliveCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toDelive" AND payed = 1', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const nbrToDeliveCommands = await Commands.customQuery('SELECT COUNT(idCommand) as nbrToDeliveCommands FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND type="toDelive"', [req.params.idRestaurant, req.params.begin, req.params.end]);
 
     // Commandes
-    const command = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? AND payed = 1 ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.begin, req.params.end]);
+    const command = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND lastUpdate > ? AND lastUpdate <= ? ORDER BY idCommand DESC', [req.params.idRestaurant, req.params.begin, req.params.end]);
     let commands = [];
 
     for (let index in command) {

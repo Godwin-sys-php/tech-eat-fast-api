@@ -2,7 +2,7 @@ const Commands = require('../../Models/Commands');
 const Resto = require('../../Models/Restaurants');
 
 module.exports = (req, res, next) => {
-  Commands.findOne({ idCommand: req.params.idCommand, payed: true })
+  Commands.findOne({ idCommand: req.params.idCommand })
     .then(command => {
       if (command) {
         Resto.findOne({ idRestaurant: command.idRestaurant })
