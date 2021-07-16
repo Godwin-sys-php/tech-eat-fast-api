@@ -18,6 +18,7 @@ module.exports = (req, res) => {
               user ? res.status(200).json({ validToken: true }) : res.status(400).json({ invalidToken: true });
             })
             .catch(error => {
+              console.log(error);
               res.status(500).json({ error: true,  });
             });
         } else {
@@ -26,6 +27,7 @@ module.exports = (req, res) => {
       }
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: true,  });
   }
 };

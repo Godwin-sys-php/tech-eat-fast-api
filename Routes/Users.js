@@ -45,6 +45,10 @@ router.get('/:idUser/address', limits(40, 15), existUser, authUserMostSecure, us
 router.get('/:idUser/phoneNumber', limits(40, 15), existUser, authUserMostSecure, userCtrl.getAllPhoneNumber); // Récupère tout les numéros d'un utilisateur
 router.get('/:idUser/commandsSaved', limits(40, 15), existUser, authUserMostSecure, userCtrl.getAllCommandsSaved); // Récupère toute les commandes sauvegardées d'un utilisateur
 
+router.get('/:idUser/commands/inRestaurant/inProgress', limits(100, 15), userCtrl.getInProgressCommandsInRestaurant); // Récupère les commandes en cours d'un utilisateur inRestaurant
+router.get('/:idUser/commands/inRestaurant/timestamp/:begin/:end', limits(100, 15), userCtrl.getCommandsWithTimestampInRestaurant); // Récupère les commandes d'un utilisateur en fonction d'une période inRestaurant
+router.get('/:idUser/commands/inRestaurant', limits(100, 15), userCtrl.getAllCommandInRestaurant); // Récupère les commandes d'un utilisateur
+
 router.delete('/:idUser', limits(50, 15), existUser, authUserMostSecure, userCtrl.deleteOneUser); // Supprime un utilisateur
 router.delete('/:idUser/address/:idAddress', limits(100, 15), existUser, existAddress, authUserMostSecure, userCtrl.deleteOneAddress); // Supprime une addresse d'un utilisateur
 router.delete('/:idUser/phoneNumber/:idPhoneNumber', limits(40, 15), existUser, existPhoneNumber, authUserMostSecure, userCtrl.deleteOnePhoneNumber); // Supprime un numéro d'un utilisateur

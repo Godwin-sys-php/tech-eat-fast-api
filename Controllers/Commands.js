@@ -12,25 +12,90 @@ require('dotenv').config();
 
 exports.addCommand = async (req, res) => {
   try {
-    if (req.haveToken) {
-      const now = moment();
+    const now = moment();
 
-      const dishes = req.body.dishes;
+    const dishes = req.body.dishes;
 
-      const total = await calculateSum(dishes);
+    const actualNumber = await Restaurants.customQuery("SELECT number FROM number WHERE idRestaurant = ?", [req.params.idRestaurant]);
 
+    const total = await calculateSum(dishes);
+
+    let toInsertCommand = {
+      idRestaurant: req.params.idRestaurant,
+      idUser: req.user.idUser,
+      orderId: `${moment().format('YY')}-${actualNumber[0].number}`,
+      pushToken: req.body.pushToken ? req.body.pushToken : null,
+      nameOfClient: req.user.name,
+      emailOfClient: req.user.email,
+      phoneNumberOfClient: req.body.phoneNumber,
+      address: req.body.type === "toTake" ? null : req.body.address,
+      reference: req.body.reference ? req.body.reference : null,
+      comment: req.body.comment,
+      type: req.body.type,
+      creationDate: now.unix(),
+      lastUpdate: now.unix(),
+      total: total,
+      paymentMethod: req.body.paymentMethod,
+      accept: null,
+      status: "inLoading",
+    };
+
+    Commands.insertOne(toInsertCommand)
+      .then(async result => {
+        const insertId = result.insertId;
+
+        try {
+          const commandItems = await createDishesTable(dishes, insertId);
+          await Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
+            .then(async (result) => {
+              await Restaurants.customQuery("UPDATE number SET number = ? WHERE idRestaurant = ?", [actualNumber[0].number + 1, req.params.idRestaurant]);
+              return res.status(201).json({ create: true, insertId: insertId });
+            })
+            .catch(error => {
+              return res.status(500).json({ error: true, });
+            });
+        } catch (error) {
+          return res.status(500).json({ error: true });
+        }
+      })
+      .catch((error) => {
+        return res.status(500).json({ error: true });
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true });
+  }
+}
+
+exports.addCommandInRestaurant = async (req, res) => {
+  try {
+    const now = moment();
+
+    const dishes = req.body.dishes;
+
+    const actualNumber = await Restaurants.customQuery("SELECT number FROM number WHERE idRestaurant = ?", [req.params.idRestaurant]);
+
+    const dataForTable = await Restaurants.customQuery('SELECT * FROM tables WHERE idTable = ? AND idRestaurant = ?', [req.body.idTable, req.params.idRestaurant]);
+
+    const total = await calculateSum(dishes);
+
+    if (dataForTable.length > 0) {
+      const tableId = dataForTable[0].tableId;
       let toInsertCommand = {
         idRestaurant: req.params.idRestaurant,
-        idUser: req.user.idUser,
-        orderId: short.new(),
+        idUser: null,
+        idTable: req.body.idTable,
+        orderId: `${moment().format('YY')}-${actualNumber[0].number}`,
+        deviceId: req.body.deviceId,
         pushToken: req.body.pushToken ? req.body.pushToken : null,
-        nameOfClient: req.user.name,
-        emailOfClient: req.user.email,
-        phoneNumberOfClient: req.body.phoneNumber,
-        address: req.body.type === "toTake" ? null : req.body.address,
-        reference: req.body.reference ? req.body.reference : null,
+        nameOfClient: req.body.name,
+        tableId: tableId,
+        emailOfClient: null,
+        phoneNumberOfClient: null,
+        address: null,
+        reference: null,
         comment: req.body.comment,
-        type: req.body.type,
+        type: "inRestaurant",
         creationDate: now.unix(),
         lastUpdate: now.unix(),
         total: total,
@@ -38,71 +103,33 @@ exports.addCommand = async (req, res) => {
         accept: null,
         status: "inLoading",
       };
-
+  
       Commands.insertOne(toInsertCommand)
         .then(async result => {
           const insertId = result.insertId;
-
+  
           try {
             const commandItems = await createDishesTable(dishes, insertId);
             await Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
               .then(async (result) => {
+                await Restaurants.customQuery("UPDATE number SET number = ? WHERE idRestaurant = ?", [actualNumber[0].number + 1, req.params.idRestaurant]);
                 return res.status(201).json({ create: true, insertId: insertId });
               })
               .catch(error => {
+                console.log(error);
                 return res.status(500).json({ error: true, });
               });
           } catch (error) {
+            console.log(error);
             return res.status(500).json({ error: true });
           }
         })
         .catch((error) => {
+          console.log(error);
           return res.status(500).json({ error: true });
         });
     } else {
-      const now = moment();
-
-      const dishes = req.body.dishes;
-      const total = await calculateSum(dishes);
-
-      let toInsertCommand = {
-        idRestaurant: req.params.idRestaurant,
-        idUser: null,
-        orderId: short.new(),
-        nameOfClient: req.body.name,
-        deviceId: req.body.deviceId,
-        pushToken: req.body.pushToken ? req.body.pushToken : null,
-        emailOfClient: null,
-        phoneNumberOfClient: req.body.phoneNumber,
-        address: req.body.type === "toTake" ? null : req.body.address,
-        reference: req.body.reference ? req.body.reference : null,
-        comment: req.body.comment,
-        type: req.body.type,
-        creationDate: now.unix(),
-        lastUpdate: now.unix(),
-        total: total,
-        paymentMethod: req.body.paymentMethod,
-        accept: null,
-        status: "inLoading",
-      };
-
-      Commands.insertOne(toInsertCommand)
-        .then(async result => {
-          const insertId = result.insertId;
-          console.log(dishes);
-          const commandItems = await createDishesTable(dishes, insertId);
-
-          Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
-            .then(() => {
-              res.status(201).json({ create: true, insertId: insertId });
-            })
-            .catch(error => {
-              res.status(500).json({ error: true,  });
-            });
-        })
-        .catch(() => {
-          res.status(500).json({ error: true });
-        });
+      return res.status(400).json({ tableNotFound: true });
     }
   } catch (error) {
     console.log(error);
@@ -272,7 +299,7 @@ exports.acceptCommand = async (req, res) => {
             sound: 'default',
             title: 'Votre commande a été accepté 😉!',
             body: 'Elle est en cuisine',
-            data: { idCommand: command.idCommand },
+            data: { idCommand: command.idCommand, type: command.type },
           };
 
           await fetch('https://exp.host/--/api/v2/push/send', {
@@ -311,7 +338,7 @@ exports.refuseCommand = async (req, res) => {
               sound: 'default',
               title: 'Votre commande a été refusé 🥺!',
               body: req.body.whyRefused,
-              data: { idCommand: command.idCommand },
+              data: { idCommand: command.idCommand, type: command.type },
             };
 
             await fetch('https://exp.host/--/api/v2/push/send', {
@@ -355,7 +382,7 @@ exports.setReady = async (req, res, next) => {
             sound: 'default',
             title: command.type === "toDelive" ? "Votre commande est en cours de livraison, patientez un peu ça en vaut la peine 😋" : "Votre commande est prête, vous pouvez venir la chercher 😋",
             body: 'Vous y êtes presque',
-            data: { idCommand: command.idCommand },
+            data: { idCommand: command.idCommand, type: command.type },
           };
 
           await fetch('https://exp.host/--/api/v2/push/send', {
@@ -395,7 +422,7 @@ exports.setDone = async (req, res) => {
             sound: 'default',
             title: "Votre commande vient d'être clôturer, c'etait un plaisir ❤️ 😋",
             body: "Nous espérons que vous avez aimé le service",
-            data: { idCommand: command.idCommand },
+            data: { idCommand: command.idCommand, type: command.type },
           };
 
           await fetch('https://exp.host/--/api/v2/push/send', {
@@ -422,7 +449,6 @@ exports.setDone = async (req, res) => {
 
 exports.getNotDoneCommand = async (req, res) => {
   try {
-    console.log(req);
     const commands = await Commands.customQuery('SELECT * FROM commands WHERE idRestaurant = ? AND status != "done" ORDER BY lastUpdate DESC', [req.params.idRestaurant]);
     let response = [];
 

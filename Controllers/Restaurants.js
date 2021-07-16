@@ -3,6 +3,24 @@ const Menus = require("../Models/Menus");
 const Dishes = require("../Models/Dishes");
 const fs = require('fs');
 
+exports.addTable = async (req, res) => {
+  try {
+    if (req.body.tableId.length > 2) {
+      const toInsert = {
+        idRestaurant: req.params.idRestaurant, 
+        tableId: req.body.tableId
+      };
+  
+      await Restaurants.customQuery('INSERT INTO tables SET ?', toInsert);
+      return res.status(200).json({ create: true })
+    } else {
+      return res.status(400).json({ invalidForm: true });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: true })
+  }
+}
+ 
 exports.updateRestaurant = (req, res) => {
   if (req.file) {
     const toSet = {
@@ -48,6 +66,23 @@ exports.updateRestaurant = (req, res) => {
   }
 };
 
+exports.editTable = async (req, res) => {
+  try {
+    if (req.body.tableId.length > 2 && req.table.idRestaurant == req.params.idRestaurant) {
+      const toInsert = {
+        tableId: req.body.tableId
+      };
+  
+      await Restaurants.customQuery('UPDATE tables SET ? WHERE idTable = ?', [toInsert, req.params.idTable]);
+      return res.status(200).json({ update: true })
+    } else {
+      return res.status(400).json({ invalidForm: true });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: true });
+  }
+}
+ 
 exports.getOneRestaurant = async (req, res) => {
   try {
     const resto = await Restaurants.customQuery('SELECT r.*, t.name AS type FROM restaurants r LEFT JOIN restaurantsType t ON r.idType = t.idType WHERE r.idRestaurant = ?', [req.params.idRestaurant]);
@@ -131,3 +166,41 @@ exports.getAllRestaurantWithType = async (req, res) => {
 exports.getMostPopular = (req, res) => {
   res.status(200).json({ inDev: true });
 };
+
+exports.getAllTables = async (req, res) => {
+  try {
+    const data = await Restaurants.customQuery('SELECT * FROM tables WHERE idRestaurant = ?', [req.params.idRestaurant]);
+
+    return res.status(200).json({ find: true, result: data });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: true });
+  }
+}
+
+exports.getOneTable = async (req, res) => {
+  try {
+    const data = await Restaurants.customQuery('SELECT * FROM tables WHERE idTable = ? AND idRestaurant = ?', [req.params.idTable, req.params.idRestaurant]);
+
+    return res.status(200).json({ find: true, result: data[0] });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: true });
+  }
+}
+
+exports.deleteOneTable = async (req, res) => {
+  try {
+    if (req.table.idRestaurant == req.params.idRestaurant) {
+  
+      await Restaurants.customQuery('DELETE FROM tables WHERE idTable = ?', [req.params.idTable]);
+      return res.status(200).json({ delete: true })
+    } else {
+      console.log(req.table);
+      return res.status(400).json({ invalidForm: true });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: true });
+  }
+}

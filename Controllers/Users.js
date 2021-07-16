@@ -17,6 +17,7 @@ exports.signup = (req, res) => {
       const now = moment();
       const toInsert = {
         name: req.body.name,
+        phoneNumber: req.body.phoneNumber,
         email: req.body.email.toLowerCase(),
         pseudo: req.body.pseudo.toLowerCase(),
         creationDate: now.unix(),
@@ -24,18 +25,34 @@ exports.signup = (req, res) => {
         password: hash
       };
       Users.insertOne(toInsert)
-        .then(() => res.status(201).json({ create: true }))
+        .then((result) => {
+
+          const toInsert = {
+            idUser: result.insertId,
+            phoneNumber: (req.body.phoneNumber),
+          };
+
+          Users.customQuery("INSERT INTO usersPhoneNumber SET ?", [toInsert])
+            .then(() => {
+              return res.status(200).json({ create: true });
+            })
+            .catch(error => {
+              res.status(500).json({ error: true, });
+            });
+        })
         .catch(error => {
-          res.status(500).json({ error: true,  });
+          res.status(500).json({ error: true, });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 };
 
 exports.login = (req, res) => {
-  Users.customQuery('SELECT * FROM users WHERE email=? OR pseudo=?', [req.body.identifiant.toLowerCase(), req.body.identifiant.toLowerCase()])
+  const request = req.body.identifiant.toLowerCase().trim() === "" || req.body.identifiant.toLowerCase().trim() < 1 ? 'SELECT * FROM users WHERE pseudo=?' : 'SELECT * FROM users WHERE pseudo=? OR email=?';
+  const params = req.body.identifiant.toLowerCase().trim() === "" || req.body.identifiant.toLowerCase().trim() < 1 ? [req.body.identifiant.toLowerCase()] : [req.body.identifiant.toLowerCase(), req.body.identifiant.toLowerCase()];
+  Users.customQuery(request, params)
     .then((user) => {
       if (user.length < 1) {
         res.status(404).json({ identifiant: false, password: false });
@@ -57,17 +74,19 @@ exports.login = (req, res) => {
             }
           })
           .catch(error => {
-            res.status(500).json({ error: true,  });
+            res.status(500).json({ error: true, });
           });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 };
 
 exports.loginNoJwt = (req, res) => {
-  Users.customQuery('SELECT * FROM users WHERE email=? OR pseudo=?', [req.body.identifiant, req.body.identifiant])
+  const request = req.body.identifiant.toLowerCase().trim() === "" || req.body.identifiant.toLowerCase().trim() < 1 ? 'SELECT * FROM users WHERE pseudo=?' : 'SELECT * FROM users WHERE pseudo=? OR email=?';
+  const params = req.body.identifiant.toLowerCase().trim() === "" || req.body.identifiant.toLowerCase().trim() < 1 ? [req.body.identifiant.toLowerCase()] : [req.body.identifiant.toLowerCase(), req.body.identifiant.toLowerCase()];
+  Users.customQuery(request, params)
     .then((user) => {
       if (user.length < 1) {
         res.status(404).json({ identifiant: false, password: false });
@@ -78,17 +97,17 @@ exports.loginNoJwt = (req, res) => {
               res.status(401).json({ identifiant: true, password: false });
             } else {
               res.status(200).json({
-                idUser: user[0].idUser,
+                user: user, identifiant: true, password: true
               });
             }
           })
           .catch(error => {
-            res.status(500).json({ error: true,  });
+            res.status(500).json({ error: true, });
           });
       }
     })
     .catch(error => {
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 };
 
@@ -106,11 +125,11 @@ exports.addAddress = (req, res) => {
           res.status(201).json({ create: true, address: address })
         })
         .catch(error => {
-          res.status(500).json({ error: true,  });
+          res.status(500).json({ error: true, });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 };
 
@@ -127,11 +146,11 @@ exports.addPhoneNumber = (req, res) => {
           res.status(201).json({ create: true, phoneNumbers: phoneNumbers })
         })
         .catch(error => {
-          res.status(500).json({ error: true,  });
+          res.status(500).json({ error: true, });
         });
     })
     .catch(error => {
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 };
 
@@ -236,30 +255,33 @@ exports.updateOneUser = (req, res) => {
           email: req.body.email,
           pseudo: req.body.pseudo,
           password: hash,
+          phoneNumber: req.body.phoneNumber,
         };
         Users.updateOne(toSet, { idUser: req.params.idUser })
           .then(() => {
             res.status(200).json({ update: true });
           })
           .catch(error => {
-            res.status(500).json({ error: true,  });
+            res.status(500).json({ error: true, });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true,  });
+        res.status(500).json({ error: true, });
       });
   } else {
     toSet = {
       name: req.body.name,
       email: req.body.email,
       pseudo: req.body.pseudo,
+      phoneNumber: req.body.phoneNumber,
     };
     Users.updateOne(toSet, { idUser: req.params.idUser })
       .then(() => {
         res.status(200).json({ update: true });
       })
       .catch(error => {
-        res.status(500).json({ error: true,  });
+        console.log(error);
+        res.status(500).json({ error: true, });
       });
   }
 };
@@ -281,12 +303,12 @@ exports.changePDP = (req, res) => {
         })
         .catch(error => {
           console.log(error);
-          res.status(500).json({ error: true,  });
+          res.status(500).json({ error: true, });
         });
     })
     .catch(error => {
       console.log(error);
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 }
 
@@ -297,19 +319,19 @@ exports.updateAddress = (req, res) => {
   };
 
   if (req.address.idUser == req.user.idUser) {
-  Users.customQuery("UPDATE usersAddress SET ? WHERE idUserAdress = ?", [toSet, req.params.idAddress])
-    .then(() => {
-      Users.customQuery("SELECT * FROM usersAddress WHERE idUser = ?", [req.params.idUser])
-        .then((address) => {
-          res.status(201).json({ update: true, address: address })
-        })
-        .catch(error => {
-          res.status(500).json({ error: true,  });
-        });
-    })
-    .catch(error => {
-      res.status(500).json({ error: true,  });
-    });
+    Users.customQuery("UPDATE usersAddress SET ? WHERE idUserAdress = ?", [toSet, req.params.idAddress])
+      .then(() => {
+        Users.customQuery("SELECT * FROM usersAddress WHERE idUser = ?", [req.params.idUser])
+          .then((address) => {
+            res.status(201).json({ update: true, address: address })
+          })
+          .catch(error => {
+            res.status(500).json({ error: true, });
+          });
+      })
+      .catch(error => {
+        res.status(500).json({ error: true, });
+      });
   } else {
     res.status(400).json({ invalidToken: true });
   }
@@ -328,14 +350,14 @@ exports.updatePhoneNumber = (req, res) => {
             res.status(201).json({ update: true, phoneNumbers: phoneNumbers })
           })
           .catch(error => {
-            res.status(500).json({ error: true,  });
+            res.status(500).json({ error: true, });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true,  });
+        res.status(500).json({ error: true, });
       });
   } else {
-    res.status(400).json({  invalidToken: true  });
+    res.status(400).json({ invalidToken: true });
   }
 };
 
@@ -347,7 +369,7 @@ exports.getOneUser = async (req, res) => {
 
     res.status(200).json({ find: true, result: { ...users, phoneNumbers: phoneNumbers, address: address, password: null, } });
   } catch (error) {
-    res.status(500).json({ error: true,  });
+    res.status(500).json({ error: true, });
   }
 };
 
@@ -389,7 +411,6 @@ exports.getInProgressCommands = async (req, res) => {
 
 exports.getInProgressCommandsNotConnected = async (req, res) => {
   try {
-    console.log(req.params.idUser);
     const commands = await Commands.customQuery('SELECT * FROM commands WHERE deviceId = ? AND status != "done" ORDER BY idCommand DESC', [req.params.idUser]);
     let response = [];
 
@@ -430,7 +451,7 @@ exports.getAllAddress = (req, res) => {
       res.status(200).json({ find: true, result: address, });
     })
     .catch(error => {
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 };
 
@@ -440,7 +461,7 @@ exports.getAllPhoneNumber = (req, res) => {
       res.status(200).json({ find: true, result: phoneNumber, });
     })
     .catch(error => {
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 };
 
@@ -453,13 +474,67 @@ exports.getAllCommandsSaved = async (req, res) => {
   }
 }
 
+exports.getInProgressCommandsInRestaurant = async (req, res) => {
+  try {
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE deviceId = ? AND status != "done" AND type="inRestaurant" ORDER BY idCommand DESC', [req.params.idUser]);
+    let response = [];
+
+    for (let index in commands) {
+      let el = commands[index];
+      let commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [el.idCommand]);
+      let restoInfo = await Restaurants.findOne({ idRestaurant: el.idRestaurant });
+      response.push({ ...el, items: commandItems, restoInfo: restoInfo });
+    }
+
+    res.status(200).json({ find: true, result: response });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+
+exports.getCommandsWithTimestampInRestaurant = async (req, res) => {
+  try {
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE deviceId = ? AND creationDate > ? AND creationDate <= ? AND type="inRestaurant" ORDER BY idCommand DESC', [req.params.idUser, req.params.begin, req.params.end]);
+    let response = [];
+
+    for (let index in commands) {
+      let el = commands[index];
+      let commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [el.idCommand]);
+      let restoInfo = await Restaurants.findOne({ idRestaurant: el.idRestaurant });
+      response.push({ ...el, items: commandItems, restoInfo: restoInfo });
+    }
+
+    res.status(200).json({ find: true, result: response });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+
+exports.getAllCommandInRestaurant = async (req, res) => {
+  try {
+    const commands = await Commands.customQuery('SELECT * FROM commands WHERE deviceId = ? AND type="inRestaurant" ORDER BY idCommand DESC', [req.params.idUser]);
+    let response = [];
+
+    for (let index in commands) {
+      let el = commands[index];
+      let commandItems = await Commands.customQuery('SELECT * FROM commandItems WHERE idCommand = ?', [el.idCommand]);
+      let restoInfo = await Restaurants.findOne({ idRestaurant: el.idRestaurant });
+      response.push({ ...el, items: commandItems, restoInfo: restoInfo });
+    }
+
+    res.status(200).json({ find: true, result: response });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+
 exports.deleteOneUser = (req, res) => {
   Users.delete({ idUser: req.params.idUser })
     .then(() => {
       res.status(200).json({ delete: true });
     })
     .catch(error => {
-      res.status(500).json({ error: true,  });
+      res.status(500).json({ error: true, });
     });
 };
 
@@ -472,11 +547,11 @@ exports.deleteOneAddress = (req, res) => {
             res.status(201).json({ delete: true, address: address })
           })
           .catch(error => {
-            res.status(500).json({ error: true,  });
+            res.status(500).json({ error: true, });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true,  });
+        res.status(500).json({ error: true, });
       });
   } else {
     res.status(400).json({ invalidToken: true });
@@ -492,11 +567,11 @@ exports.deleteOnePhoneNumber = (req, res) => {
             res.status(201).json({ delete: true, phoneNumbers: phoneNumbers })
           })
           .catch(error => {
-            res.status(500).json({ error: true,  });
+            res.status(500).json({ error: true, });
           });
       })
       .catch(error => {
-        res.status(500).json({ error: true,  });
+        res.status(500).json({ error: true, });
       });;
   } else {
     res.status(400).json({ invalidToken: true });

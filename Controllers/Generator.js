@@ -60,7 +60,7 @@ module.exports = (req, res) => {
         number: number,
         date: now.format('DD/MM/yyyy'),
         hours: now.format('HH:mm'),
-        client: command.nameOfClient,
+        client: command.nameOfClient !== null && command.nameOfClient.length > 0 ? command.nameOfClient : "INCONNU",
         restaurantName: restoInfo.name,
         restaurantAddress: restoInfo.address,
         orderId: command.orderId,

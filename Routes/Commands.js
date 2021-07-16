@@ -4,6 +4,7 @@ const limits = require('../Middlewares/Limits/limits');
 
 const existRestaurant = require('../Middlewares/Exists/existRestaurant');
 const validatorCommand = require('../Middlewares/Validators/validatorCommand');
+const validatorCommandInRestaurant = require('../Middlewares/Validators/validatorCommandInRestaurant');
 const existCommand = require('../Middlewares/Exists/existCommand');
 const authUserForCommands = require('../Middlewares/Auth/authUserForCommands');
 const authRestaurant = require('../Middlewares/Auth/authRestaurant');
@@ -15,6 +16,7 @@ const generator = require('../Controllers/Generator');
 const commandCtrl = require('../Controllers/Commands');
 
 router.post('/restaurant/:idRestaurant', limits(50, 15), existRestaurant, authUserForCommands, validatorCommand, commandCtrl.addCommand); // Ajoute une commande sans la payée
+router.post('/restaurant/:idRestaurant/inRestaurant', limits(50, 15), existRestaurant, authUserForCommands, validatorCommandInRestaurant, commandCtrl.addCommandInRestaurant); // Ajoute une commande sans la payée
 // router.post('/restaurant/:idRestaurant/andPay', limits(50, 15), existRestaurant, authUserForCommands, authMobile, validatorCommand, commandCtrl.addCommandAndPay); // Ajoute une commande en la payant (+ token)
 
 router.put('/:idCommand/accept', limits(200, 15), existCommand, authRestaurant, commandCtrl.acceptCommand); 
