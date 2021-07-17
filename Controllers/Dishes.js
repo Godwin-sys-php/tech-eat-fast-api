@@ -1,4 +1,5 @@
 const Dishes = require("../Models/Dishes");
+const Menus = require("../Models/Menus");
 const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
@@ -344,12 +345,13 @@ exports.getFromRestaurant = async (req, res) => {
           await Dishes.customQuery('SELECT idDishOption, name, price FROM dishOptions WHERE idDish= ?', [dishes[index].idDish])
             .then(async options => {
               await Dishes.customQuery('SELECT name FROM dishIngredients WHERE idDish= ?', [dishes[index].idDish])
-                .then(ingredients2 => {
+                .then(async ingredients2 => {
                   let ingredients = [];
                   for (let index in ingredients2) {
                     ingredients.push(ingredients2[index].name);
                   }
-                  response.push({ ...dishes[index], options: options, ingredients: ingredients });
+                  const menu = Menus.findOne({ idMenu: dishes[index].idMenu });
+                  response.push({ ...dishes[index], options: options, ingredients: ingredients, nameMenu: menu.name });
                 })
                 .catch(error => {
                   res.status(500).json({ error: true,  });
