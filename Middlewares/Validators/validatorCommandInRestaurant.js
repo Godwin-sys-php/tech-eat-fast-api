@@ -20,24 +20,29 @@ module.exports = async (req, res, next) => {
       for (let index in dishes) {
         if (dishes[index].hasOwnProperty("idDish") && dishes[index].hasOwnProperty("quantity")) {
           const dish = await Dishes.findOne({ idDish: dishes[index].idDish });
-          const options2 = await Dishes.customQuery("SELECT * FROM dishOptions WHERE idDish = ?", [dishes[index].idDish]);
-          let options = [];
-          options2.forEach(option => { options.push(option.idDishOption) });
+          if (dish.needOption === 1 && !dishes[index].hasOwnProperty("idOption")) {
+            res.status(400).json({ invalidForm: true });
+            break;
+          } else {
+            const options2 = await Dishes.customQuery("SELECT * FROM dishOptions WHERE idDish = ?", [dishes[index].idDish]);
+            let options = [];
+            options2.forEach(option => { options.push(option.idDishOption) });
 
-          if (dish && dish.idRestaurant == req.params.idRestaurant) {
-            if (dishes[index].hasOwnProperty("idOption")) {
-              if (options.includes(dishes[index].idOption)) {
-                continue;
+            if (dish && dish.idRestaurant == req.params.idRestaurant) {
+              if (dishes[index].hasOwnProperty("idOption")) {
+                if (options.includes(dishes[index].idOption)) {
+                  continue;
+                } else {
+                  res.status(400).json({ invalidFormDishes: true });
+                  break;
+                }
               } else {
-                res.status(400).json({ invalidFormDishes: true });
-                break;
+                continue;
               }
             } else {
-              continue;
+              res.status(400).json({ invalidFormDishes: true });
+              break;
             }
-          } else {
-            res.status(400).json({ invalidFormDishes: true });
-            break;
           }
         } else {
           res.status(400).json({ invalidForm: true });

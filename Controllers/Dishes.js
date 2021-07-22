@@ -17,7 +17,8 @@ exports.addDish = async (req, res) => {
     calories: req.body.calories ? req.body.calories : null,
     imageUrl: `${req.protocol}://${req.get("host")}/Images-Dishes/${req.file.filename
       }`,
-    available: true
+    available: true,
+    needOption: req.body.needOption,
   };
 
   await Dishes.insertOne(toInsert)
@@ -83,6 +84,7 @@ exports.updateDish = (req, res) => {
       price: parseInt(req.body.price),
       imageUrl: `${req.protocol}://${req.get("host")}/Images-Dishes/${req.file.filename
         }`,
+        needOption: req.body.needOption,
     };
 
     Dishes.findOne({ idDish: req.params.idDish })
@@ -197,6 +199,7 @@ exports.updateDish = (req, res) => {
           });
       })
       .catch((error) => {
+        console.log(error);
         res.status(500).json({ error: true,  });
       });
   } else {
@@ -206,6 +209,7 @@ exports.updateDish = (req, res) => {
       description: req.body.description,
       calories: req.body.calories ? req.body.calories : null,
       price: req.body.price,
+      needOption: req.body.needOption,
     };
     Dishes.updateOne(toSet, { idDish: req.params.idDish })
       .then(() => {
@@ -350,7 +354,7 @@ exports.getFromRestaurant = async (req, res) => {
                   for (let index in ingredients2) {
                     ingredients.push(ingredients2[index].name);
                   }
-                  const menu = Menus.findOne({ idMenu: dishes[index].idMenu });
+                  const menu = await Menus.findOne({ idMenu: dishes[index].idMenu });
                   response.push({ ...dishes[index], options: options, ingredients: ingredients, nameMenu: menu.name });
                 })
                 .catch(error => {
