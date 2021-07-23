@@ -89,8 +89,6 @@ exports.updateDish = (req, res) => {
 
     Dishes.findOne({ idDish: req.params.idDish })
       .then((dish) => {
-        const filename = dish.imageUrl.split("/Images-Dishes/")[1];
-        fs.unlinkSync(path.join(__dirname, "../Images-Dishes", filename));
 
         Dishes.updateOne(toSet, { idDish: req.params.idDish })
           .then(() => {
