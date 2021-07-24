@@ -18,19 +18,19 @@ module.exports = (bodyOfRequest, needOptionsArray = true, req) => {
         if (
           typeof options[index] === "object" &&
           (options[index].hasOwnProperty('name') && options[index].name.length >= 2 && options[index].name.length <= 30 && _.isString(options[index].name)) &&
-          (options[index].hasOwnProperty('price') && parseInt(options[index].price) >= 1000 && _.isNumber(parseInt(options[index].price)) && Number.isInteger(Number(options[index].price)))
+          (options[index].hasOwnProperty('price') && (options[index].price) > 0)
         ) {
           if (req.params.idDish) {
             newArray.push({
               idDish: req.params.idDish,
               name: options[index].name,
-              price: parseInt(options[index].price),
+              price: (options[index].price),
             });
             newArrayFormat.push([options[index].name, options[index].price]);
           } else {
             newArray.push({
               name: options[index].name,
-              price: parseInt(options[index].price),
+              price: (options[index].price),
             });
             newArrayFormat.push([options[index].name, options[index].price]);
           }

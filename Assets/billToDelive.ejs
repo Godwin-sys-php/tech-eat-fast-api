@@ -95,8 +95,8 @@
           <tr>
             <td class="item-element-name"><%= item.nameOfDish %></td>
             <td class="item-element"><%= item.quantity %></td>
-            <td class="item-element"><%= item.price %>Fc</td>
-            <td class="item-element"><%= item.price * item.quantity %>Fc</td>
+            <td class="item-element"><%= item.price %>$</td>
+            <td class="item-element"><%= item.price * item.quantity %>$</td>
           </tr>
         <% }); %>
       </table>
@@ -105,14 +105,14 @@
       <table class="bref" align="right">
         <tr>
           <td>TOTAL</td>
-          <td><%= data.total %>Fc</td>
+          <td><%= data.total %>$</td>
         </tr>
       </table>
       <br /><br /><br />
       <table class="total">
         <tr>
           <td>TOTAL GÉNÉRAL</td>
-          <td class="align-right"><%= data.total %>Fc</td>
+          <td class="align-right"><%= data.total %>$</td>
         </tr>
       </table>
       <br />

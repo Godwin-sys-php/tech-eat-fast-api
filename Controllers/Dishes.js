@@ -12,7 +12,7 @@ exports.addDish = async (req, res) => {
     idMenu: req.params.idMenu,
     name: req.body.name,
     description: req.body.description,
-    price: parseInt(req.body.price),
+    price: (req.body.price),
     creationDate: now.unix(),
     calories: req.body.calories ? req.body.calories : null,
     imageUrl: `${req.protocol}://${req.get("host")}/Images-Dishes/${req.file.filename
@@ -81,7 +81,7 @@ exports.updateDish = (req, res) => {
       idMenu: req.body.idMenu,
       description: req.body.description,
       calories: req.body.calories ? req.body.calories : null,
-      price: parseInt(req.body.price),
+      price: (req.body.price),
       imageUrl: `${req.protocol}://${req.get("host")}/Images-Dishes/${req.file.filename
         }`,
         needOption: req.body.needOption,
