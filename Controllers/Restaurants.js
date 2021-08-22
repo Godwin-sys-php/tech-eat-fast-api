@@ -110,8 +110,38 @@ exports.getOneRestaurantWithMenus = async (req, res) => {
   try {
     let newMenus = [];
 
-    const restoInfo = await Restaurants.findOne({ idRestaurant: req.params.idRestaurant });
+
+    const restoInfo = await Restaurants.findOne({ idRestaurant: req.resto.idRestaurant });
     const menus = await Menus.customQuery('SELECT name, idMenu FROM menus WHERE idRestaurant = ?', [req.params.idRestaurant]);
+
+    for (let index in menus) {
+      let until = await Dishes.customQuery('SELECT * FROM dishes WHERE idMenu = ?', [menus[index].idMenu]);
+      newMenus.push({ ...menus[index], dishes: until });
+    }
+
+    if (newMenus.length > 0) {
+      for (let index in newMenus) {
+        if (newMenus[index].dishes.length > 0) {
+          for (let i in newMenus[index].dishes) {
+            let options = await Dishes.customQuery('SELECT idDishOption, name, price FROM dishOptions WHERE idDish= ?', [newMenus[index].dishes[i].idDish]);
+            newMenus[index].dishes[i] = {...newMenus[index].dishes[i], options: options};
+          }
+        }
+      }
+    }
+
+    res.status(200).json({ find: true, result: {restoInfo: restoInfo, menus: newMenus} });
+  } catch (error) {
+    res.status(500).json({ error: true,  });
+  }
+}
+
+exports.getOneRestaurantWithMenusWithSlug= async (req, res) => {
+  try {
+    let newMenus = [];
+
+    const restoInfo = await Restaurants.findOne({ idRestaurant: req.resto.idRestaurant });
+    const menus = await Menus.customQuery('SELECT name, idMenu FROM menus WHERE idRestaurant = ?', [req.resto.idRestaurant]);
 
     for (let index in menus) {
       let until = await Dishes.customQuery('SELECT * FROM dishes WHERE idMenu = ?', [menus[index].idMenu]);
@@ -181,7 +211,7 @@ exports.getAllTables = async (req, res) => {
 exports.getOneTable = async (req, res) => {
   try {
     const data = await Restaurants.customQuery('SELECT * FROM tables WHERE idTable = ? AND idRestaurant = ?', [req.params.idTable, req.params.idRestaurant]);
-
+    console.log([req.params.idTable, req.params.idRestaurant]);
     return res.status(200).json({ find: true, result: data[0] });
   } catch (error) {
     console.log(error);

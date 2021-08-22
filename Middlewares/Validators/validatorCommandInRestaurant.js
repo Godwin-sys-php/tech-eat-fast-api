@@ -29,18 +29,18 @@ module.exports = async (req, res, next) => {
             options2.forEach(option => { options.push(option.idDishOption) });
 
             if (dish && dish.idRestaurant == req.params.idRestaurant) {
-              if (dishes[index].hasOwnProperty("idOption")) {
+              if (dishes[index].hasOwnProperty("idOption") && dishes[index].idOption !== null) {
                 if (options.includes(dishes[index].idOption)) {
                   continue;
                 } else {
-                  res.status(400).json({ invalidFormDishes: true });
+                  return res.status(400).json({ invalidFormDishes: true });
                   break;
                 }
               } else {
                 continue;
               }
             } else {
-              res.status(400).json({ invalidFormDishes: true });
+              return res.status(400).json({ invalidFormDishes: true });
               break;
             }
           }
