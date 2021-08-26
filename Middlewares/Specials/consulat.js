@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 
 module.exports = async (req, res) => {
   try {
-    const idOfCommand = req.insertId;
+    const idOfCommand = req.idCommand;
 
     const command = await Commands.findOne({ idCommand: idOfCommand });
     const items = await Commands.customQuery("SELECT * FROM commandItems WHERE idCommand = ?", [idOfCommand]);
