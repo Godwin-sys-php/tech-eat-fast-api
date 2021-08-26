@@ -31,8 +31,10 @@ module.exports = async (req, res) => {
         }
       };
 
-      await fetch(`http://le-consulat-drc.com/api/sessions/${two.idInserted}/addItem`, init)
+      const zero123 = await fetch(`http://le-consulat-drc.com/api/sessions/${two.idInserted}/addItem`, init);
 
+      const result = await zero123.json();
+      console.log(result);
     }
 
     const init = {
