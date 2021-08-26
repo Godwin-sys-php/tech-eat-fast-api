@@ -3,6 +3,7 @@ const Menus = require("../Models/Menus");
 const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
+const fetch = require('node-fetch');
 
 exports.addDish = async (req, res) => {
   const now = moment();
@@ -79,6 +80,7 @@ exports.updateDish = (req, res) => {
     const toSet = {
       name: req.body.name,
       idMenu: req.body.idMenu,
+      leconsulID: req.body.leconsulID ? req.body.leconsulID : null,
       description: req.body.description,
       calories: req.body.calories ? req.body.calories : null,
       price: (req.body.price),
@@ -177,10 +179,12 @@ exports.updateDish = (req, res) => {
                             res.status(201).json({ update: true });
                           })
                           .catch(error => {
+                            console.log(error);
                             res.status(500).json({ error: true,  });
                           });
                       })
                       .catch((error) => {
+                        console.log(error);
                         res.status(500).json({ error: true,  });
                       });
                   } else {
@@ -188,11 +192,13 @@ exports.updateDish = (req, res) => {
                   }
                 })
                 .catch((error) => {
+                  console.log(error);
                   res.status(500).json({ error: true,  });
                 });
             }
           })
           .catch((error) => {
+            console.log(error);
             res.status(500).json({ error: true,  });
           });
       })
@@ -204,6 +210,7 @@ exports.updateDish = (req, res) => {
     const toSet = {
       name: req.body.name,
       idMenu: req.body.idMenu,
+      leconsulID: req.body.leconsulID ? req.body.leconsulID : null,
       description: req.body.description,
       calories: req.body.calories ? req.body.calories : null,
       price: req.body.price,
@@ -261,6 +268,7 @@ exports.updateDish = (req, res) => {
               }
             })
             .catch((error) => {
+              console.log(error);
               res.status(500).json({ error: true,  });
             });
         } else {
@@ -293,6 +301,7 @@ exports.updateDish = (req, res) => {
         }
       })
       .catch((error) => {
+        console.log(error);
         res.status(500).json({ error: true,  });
       });
   }

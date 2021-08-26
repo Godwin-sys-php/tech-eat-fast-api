@@ -25,6 +25,7 @@ router.get('/type/restaurants', limits(75, 15), restoCtrl.getAllRestaurantWithTy
 router.get('/most-popular', limits(75, 15), existRestaurant, restoCtrl.getMostPopular); // Récupère les restaurants les plus populaire
 router.get('/:idRestaurant/tables', limits(30, 15), existRestaurant, authRestaurantAdmin, restoCtrl.getAllTables); // Récupère toute les tables
 router.get('/:idRestaurant/tables/:idTable', limits(30, 15), existRestaurant, existTable, restoCtrl.getOneTable); // Récupère une table
+router.get('/special/consul/refresh', limits(400, 15), restoCtrl.refreshConsulat); // Récupère une table
 
 router.delete('/:idRestaurant/tables/:idTable', limits(30, 15), existRestaurant, existTable, authRestaurantAdmin, restoCtrl.deleteOneTable); // Supprime une table
 

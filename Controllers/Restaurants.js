@@ -2,6 +2,7 @@ const Restaurants = require("../Models/Restaurants");
 const Menus = require("../Models/Menus");
 const Dishes = require("../Models/Dishes");
 const fs = require('fs');
+const fetch = require('node-fetch');
 
 exports.addTable = async (req, res) => {
   try {
@@ -217,6 +218,48 @@ exports.getOneTable = async (req, res) => {
     console.log(error);
     return res.status(500).json({ error: true });
   }
+}
+
+exports.refreshConsulat = async (req, res) => {
+
+  try {
+    const init = {
+      method: "GET",
+      headers: {
+        'Authorization': 'Bearer token_special_tech-eat-fast', 
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    };
+    const begin = await fetch(`http://le-consulat-drc.com/api/products`, init);
+    const other = await begin.json();
+    const productOfConsulatRemote = other.result;
+    console.log(productOfConsulatRemote);
+    const productsOfConsulatLocal = await Dishes.customQuery("SELECT * FROM dishes WHERE idRestaurant = 2", []);
+    
+    for (let index in productsOfConsulatLocal) {
+      if (productsOfConsulatLocal[index].leconsulID !== null) {
+        for (let i in productOfConsulatRemote) {
+          if (productOfConsulatRemote[i].idProduct === productsOfConsulatLocal[index].leconsulID) {
+            if (productOfConsulatRemote[i].inStock >= 1) {
+              await Dishes.updateOne({ available: true }, { idDish: productsOfConsulatLocal[index].idDish });
+            } else {
+              await Dishes.updateOne({ available: false }, { idDish: productsOfConsulatLocal[index].idDish });
+            }
+          }
+          continue;
+        }
+      }
+      continue;
+    }
+  
+    return res.status(200).json({ update: true });
+  } catch (error) {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    return res.status(500).json({ error: true });
+  }
+
 }
 
 exports.deleteOneTable = async (req, res) => {
