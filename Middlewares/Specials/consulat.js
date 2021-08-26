@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
     const command = await Commands.findOne({ idCommand: idOfCommand });
     const items = await Commands.customQuery("SELECT * FROM commandItems WHERE idCommand = ?", [idOfCommand]);
 
-    const one = await fetch("http://le-consulat-drc.com/sessions", {
+    const one = await fetch("http://le-consulat-drc.com/api/sessions", {
       method: 'POST',
       body: JSON.stringify({ nameOfServer: "Exaucée" }),
       headers: {
@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
         }
       };
 
-      await fetch(`http://le-consulat-drc.com/sessions/${two.idInserted}/addItem`, init)
+      await fetch(`http://le-consulat-drc.com/api/sessions/${two.idInserted}/addItem`, init)
 
     }
 
@@ -65,7 +65,7 @@ module.exports = async (req, res) => {
     }
   
     return res.status(200).json({ update: true });
-    
+
   } catch (error) {
     return res.status(500).json({ error: true });
   }
