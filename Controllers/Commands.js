@@ -312,7 +312,7 @@ exports.acceptCommand = async (req, res) => {
             },
             body: JSON.stringify(message),
           });
-          if (command.idCommand === 2) {
+          if (command.idRestaurant === 2) {
             next();
           }
         })
