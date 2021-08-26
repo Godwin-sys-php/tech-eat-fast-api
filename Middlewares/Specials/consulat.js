@@ -18,6 +18,7 @@ module.exports = async (req, res) => {
       }
     });
     const two = await one.json();
+    console.log(two);
     
     for (let index in items) {
       const dishInfo = await Dishes.findOne({...items[index].idDish});
