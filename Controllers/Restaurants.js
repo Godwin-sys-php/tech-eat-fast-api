@@ -233,7 +233,6 @@ exports.refreshConsulat = async (req, res) => {
     const begin = await fetch(`http://le-consulat-drc.com/api/products`, init);
     const other = await begin.json();
     const productOfConsulatRemote = other.result;
-    console.log(productOfConsulatRemote);
     const productsOfConsulatLocal = await Dishes.customQuery("SELECT * FROM dishes WHERE idRestaurant = 2", []);
     
     for (let index in productsOfConsulatLocal) {

@@ -288,7 +288,7 @@ exports.addCommandInRestaurant = async (req, res) => {
 //   }
 // }
 
-exports.acceptCommand = async (req, res) => {
+exports.acceptCommand = async (req, res, next) => {
   try {
     const now = moment();
     const command = await Commands.findOne({ idCommand: req.params.idCommand });
@@ -313,7 +313,7 @@ exports.acceptCommand = async (req, res) => {
             body: JSON.stringify(message),
           });
           if (command.idRestaurant === 2) {
-            next();
+            return next();
           }
         })
         .catch(error => {

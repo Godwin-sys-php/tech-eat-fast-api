@@ -18,7 +18,6 @@ module.exports = async (req, res) => {
       }
     });
     const two = await one.json();
-    console.log(two);
     
     for (let index in items) {
       const dishInfo = await Dishes.findOne({...items[index].idDish});
@@ -46,7 +45,6 @@ module.exports = async (req, res) => {
     const begin = await fetch(`http://le-consulat-drc.com/api/products`, init);
     const other = await begin.json();
     const productOfConsulatRemote = other.result;
-    console.log(productOfConsulatRemote);
     const productsOfConsulatLocal = await Dishes.customQuery("SELECT * FROM dishes WHERE idRestaurant = 2", []);
     
     for (let index in productsOfConsulatLocal) {
