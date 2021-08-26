@@ -113,6 +113,7 @@ exports.addCommandInRestaurant = async (req, res) => {
             await Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
               .then(async (result) => {
                 await Restaurants.customQuery("UPDATE number SET number = ? WHERE idRestaurant = ?", [actualNumber[0].number + 1, req.params.idRestaurant]);
+                req.insertId = insertId;
                 return res.status(201).json({ create: true, insertId: insertId });
               })
               .catch(error => {
@@ -311,7 +312,9 @@ exports.acceptCommand = async (req, res) => {
             },
             body: JSON.stringify(message),
           });
-          return res.status(200).json({ update: true });
+          if (command.idCommand === 2) {
+            next();
+          }
         })
         .catch(error => {
           res.status(500).json({ error: true });
