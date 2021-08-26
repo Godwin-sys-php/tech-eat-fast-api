@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     const two = await one.json();
     
     for (let index in items) {
-      const dishInfo = await Dishes.findOne({...items[index].idDish});
+      const dishInfo = await Dishes.findOne({ idDish: items[index].idDish});
 
       const init = {
         method: 'PUT',
