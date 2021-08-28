@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
 
     const one = await fetch("http://le-consulat-drc.com/api/sessions", {
       method: 'POST',
-      body: JSON.stringify({ nameOfServer: "Exaucée" }),
+      body: JSON.stringify({ nameOfServer: "Exaucée", nameOfClient: command.nameOfClient, }),
       headers: {
         'Authorization': 'Bearer token_special_tech-eat-fast',
         "Content-type": "application/json; charset=UTF-8"
@@ -22,19 +22,18 @@ module.exports = async (req, res) => {
     for (let index in items) {
       const dishInfo = await Dishes.findOne({ idDish: items[index].idDish});
 
-      const init = {
-        method: 'PUT',
-        body: JSON.stringify({ idProduct: dishInfo.leconsulID, quantity: items[index].quantity, }),
-        headers: {
-          'Authorization': 'Bearer token_special_tech-eat-fast',
-          "Content-type": "application/json; charset=UTF-8"
-        }
-      };
-
-      const zero123 = await fetch(`http://le-consulat-drc.com/api/sessions/${two.idInserted}/addItem`, init);
-
-      const result = await zero123.json();
-      console.log(result);
+      if (dishInfo.leconsulID) {
+        const init = {
+          method: 'PUT',
+          body: JSON.stringify({ idProduct: dishInfo.leconsulID, quantity: items[index].quantity, }),
+          headers: {
+            'Authorization': 'Bearer token_special_tech-eat-fast',
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        };
+  
+        const zero123 = await fetch(`http://le-consulat-drc.com/api/sessions/${two.idInserted}/addItem`, init);
+      }
     }
 
     const init = {
