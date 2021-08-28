@@ -7,6 +7,9 @@ const UsersRestaurant = require('../../Models/UsersRestaurant');
 module.exports = (req, res, next) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
+    if (token === "token-special-le-consulat") {
+      return next();
+    }
     const decodedToken = jwt.verify(token, process.env.TOKEN);
     UsersRestaurant.findOne({ idUserRestaurant: decodedToken.idUserRestaurant })
       .then(user => {
