@@ -120,7 +120,7 @@ exports.getOneRestaurant = async (req, res) => {
 
 exports.getFeedBacks = async (req, res) => {
   try {
-    const feedbacks = await RestaurantsFeedBack.customQuery("SELECT * FROM `restaurantsFeedback` WHERE idRestaurant = ?", [req.params.idRestaurant]);
+    const feedbacks = await RestaurantsFeedBack.customQuery("SELECT * FROM `restaurantsFeedBack` WHERE idRestaurant = ?", [req.params.idRestaurant]);
     return res.status(200).json({ find: true, result: feedbacks, });
   } catch (error) {
     console.log('====================================');
