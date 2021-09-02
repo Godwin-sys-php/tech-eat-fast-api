@@ -3,6 +3,7 @@ const Menus = require("../Models/Menus");
 const Dishes = require("../Models/Dishes");
 const fs = require('fs');
 const fetch = require('node-fetch');
+const RestaurantsFeedBack = require("../Models/RestaurantsFeedBack");
 
 exports.addTable = async (req, res) => {
   try {
@@ -13,6 +14,26 @@ exports.addTable = async (req, res) => {
       };
   
       await Restaurants.customQuery('INSERT INTO tables SET ?', toInsert);
+      return res.status(200).json({ create: true })
+    } else {
+      return res.status(400).json({ invalidForm: true });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: true })
+  }
+}
+
+exports.addFeedBack = async (req, res) => {
+  try {
+    if (req.body.content.length > 2) {
+      const toInsert = {
+        idRestaurant: req.params.idRestaurant, 
+        nameOfClient: req.body.nameOfClient,
+        contact: req.body.contact,
+        content: req.body.content,
+      };
+  
+      await RestaurantsFeedBack.insertOne(toInsert);
       return res.status(200).json({ create: true })
     } else {
       return res.status(400).json({ invalidForm: true });
@@ -96,6 +117,18 @@ exports.getOneRestaurant = async (req, res) => {
     res.status(500).json({ error: true,  });
   }
 };
+
+exports.getFeedBacks = async (req, res) => {
+  try {
+    const feedbacks = await RestaurantsFeedBack.customQuery("SELECT * FROM `restaurantsFeedback` WHERE idRestaurant = ?", [req.params.idRestaurant]);
+    return res.status(200).json({ find: true, result: feedbacks, });
+  } catch (error) {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    return res.status(500).json({ error: true, });
+  }
+}
 
 exports.getAllRestaurant = (req, res) => {
   Restaurants.findAll()

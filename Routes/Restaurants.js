@@ -12,11 +12,13 @@ const resizer = require('../Middlewares/Resizer/resizer');
 const restoCtrl = require('../Controllers/Restaurants');
 
 router.post('/:idRestaurant/tables', limits(30, 15), existRestaurant, authRestaurantAdmin, restoCtrl.addTable); // Ajoute une nouvelle table
+router.post('/:idRestaurant/feedback', limits(30, 15), existRestaurant, restoCtrl.addFeedBack); // Ajoute un feedback
 
 router.put('/:idRestaurant', limits(30, 15), existRestaurant, authRestaurantAdmin, fileUpload, resizer(500, "Images-Resto"), validatorRestaurant, restoCtrl.updateRestaurant); // Modifie un restaurant
 router.put('/:idRestaurant/tables/:idTable', limits(30, 15), existRestaurant, existTable, authRestaurantAdmin, restoCtrl.editTable); // Modifie une table
 
 router.get('/:idRestaurant', limits(50, 15), existRestaurant, restoCtrl.getOneRestaurant); // Récupère un restaurant
+router.get('/:idRestaurant/feedbacks', limits(50, 15), existRestaurant, authRestaurantAdmin, restoCtrl.getFeedBacks); // Récupère les feedbacks
 router.get('/other/search', limits(3000, 15), restoCtrl.searchOneRestaurant); // Rechercher un restaurant
 router.get('/:idRestaurant/withMenusAndDishes', limits(50, 15), existRestaurant, restoCtrl.getOneRestaurantWithMenus); // Récupère un restaurant avec ses menus et ses plâts
 router.get('/slug/:slug/withMenusAndDishes', limits(50, 15), existSlug, restoCtrl.getOneRestaurantWithMenusWithSlug); // Récupère un restaurant avec ses menus et ses plâts sur base du slug
