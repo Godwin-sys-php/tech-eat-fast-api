@@ -9,6 +9,7 @@ class Restaurants {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
+          db.destroy();
         }
       );
     });
@@ -22,8 +23,10 @@ class Restaurants {
           if (error) reject(error);
           if (results.length < 1 || _.isNull(results) || _.isUndefined(results)) {
             resolve(null);
+            db.destroy();
           } else {
             resolve(results[0]);
+            db.destroy();
           }
         }
       );
@@ -37,6 +40,7 @@ class Restaurants {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
+          db.destroy();
         }
       );
     });
@@ -49,6 +53,7 @@ class Restaurants {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
+          db.destroy();
         }
       );
     });
@@ -61,6 +66,7 @@ class Restaurants {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
+          db.destroy();
         }
       );
     });
@@ -73,6 +79,7 @@ class Restaurants {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
+          db.destroy();
         }
       );
     });

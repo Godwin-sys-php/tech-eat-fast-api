@@ -16,12 +16,16 @@ const path = require('path');
 const verifyToken = require('./Controllers/verifyToken');
 const verifyTokenUser = require('./Controllers/verifyTokenUser');
 const _ = require('underscore');
+const SocketService = require("./Utils/socket");
 
 require('dotenv').config();
 
 const app = express();
 
+const server = require('http').Server(app);
+
 app.set('view engine', 'ejs');
+app.set("socketService", new SocketService(server));
 
 app.use(cors()); // On accepte toute les requêtes de n'importe quelle serveur
 
@@ -80,6 +84,8 @@ app.use('/commands', commandsRoute);
 
 app.get('/test-quick', (req, res) => {
   res.redirect('exp://127.0.0.1:19000/');
-})
+});
 
-module.exports = app;
+server.listen(4200, function () {
+  console.debug(`listening on port 4200`);
+});

@@ -11,13 +11,17 @@ module.exports = async (req, res, next) => {
       pm.push("cash");
     }
 
+    const methods = await Restaurants.customQuery('SELECT m.name FROM restaurantsMethod m WHERE m.idRestaurant = ?', [req.params.idRestaurant]);
+    
+    const finalMethods = methods.map((obj) => obj.name );
+
     if (req.haveToken) {
       if (req.body.type === 'toDelive') {
         if (
           (Number.isInteger(Number(req.body.phoneNumber)) && !isNaN(Number(req.body.phoneNumber))) &&
           (_.isString(req.body.address) && req.body.address.length >= 5 && req.body.address.length < 300) &&
           (_.isString(req.body.comment) && req.body.comment.length >= 0 && req.body.comment.length < 300) &&
-          (_.isString(req.body.type) && (req.body.type === 'toTake' || req.body.type === 'toDelive')) &&
+          (finalMethods.includes(req.body.type)) &&
           (pm.includes(req.body.paymentMethod)) &&
           (_.isArray(req.body.dishes) && (req.body.dishes.length > 0))
         ) {
@@ -62,7 +66,7 @@ module.exports = async (req, res, next) => {
         if (
           (Number.isInteger(Number(req.body.phoneNumber)) && !isNaN(Number(req.body.phoneNumber))) &&
           (_.isString(req.body.comment) && req.body.comment.length >= 0 && req.body.comment.length < 300) &&
-          (_.isString(req.body.type) && (req.body.type === 'toTake' || req.body.type === 'toDelive')) &&
+          (finalMethods.includes(req.body.type)) &&
           (pm.includes(req.body.paymentMethod)) &&
           (_.isArray(req.body.dishes) && (req.body.dishes.length > 0))
         ) {
@@ -114,7 +118,7 @@ module.exports = async (req, res, next) => {
           (Number.isInteger(Number(req.body.phoneNumber)) && !isNaN(Number(req.body.phoneNumber))) &&
           (_.isString(req.body.address) && req.body.address.length >= 5 && req.body.address.length < 300) &&
           (_.isString(req.body.comment) && req.body.comment.length >= 0 && req.body.comment.length < 300) &&
-          (_.isString(req.body.type) && (req.body.type === 'toTake' || req.body.type === 'toDelive')) &&
+          (finalMethods.includes(req.body.type)) &&
           (pm.includes(req.body.paymentMethod)) &&
           (_.isArray(req.body.dishes) && (req.body.dishes.length > 0))
         ) {
@@ -156,7 +160,7 @@ module.exports = async (req, res, next) => {
           (_.isString(req.body.deviceId) && req.body.deviceId.length >= 5 && req.body.deviceId.length < 100) &&
           (Number.isInteger(Number(req.body.phoneNumber)) && !isNaN(Number(req.body.phoneNumber))) &&
           (_.isString(req.body.comment) && req.body.comment.length >= 0 && req.body.comment.length < 300) &&
-          (_.isString(req.body.type) && (req.body.type === 'toTake' || req.body.type === 'toDelive')) &&
+          (finalMethods.includes(req.body.type)) &&
           (pm.includes(req.body.paymentMethod)) &&
           (_.isArray(req.body.dishes) && (req.body.dishes.length > 0))
         ) {

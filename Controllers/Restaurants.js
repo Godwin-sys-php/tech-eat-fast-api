@@ -109,10 +109,12 @@ exports.getOneRestaurant = async (req, res) => {
   try {
     const resto = await Restaurants.customQuery('SELECT r.*, t.name AS type FROM restaurants r LEFT JOIN restaurantsType t ON r.idType = t.idType WHERE r.idRestaurant = ?', [req.params.idRestaurant]);
     const pm = await Restaurants.customQuery('SELECT pm.name FROM PaymentMethodRestaurant pm WHERE pm.idRestaurant = ?', [req.params.idRestaurant]);
+    const methods = await Restaurants.customQuery('SELECT m.name FROM restaurantsMethod m WHERE m.idRestaurant = ?', [req.params.idRestaurant]);
     
     const finalPm = pm.map((obj) => obj.name );
+    const finalMethods = methods.map((obj) => obj.name );
 
-    res.status(200).json({ find: true, result: {...resto[0], paymentMethodAccept: finalPm} });
+    res.status(200).json({ find: true, result: {...resto[0], paymentMethodAccept: finalPm, methods: finalMethods} });
   } catch (error) {
     res.status(500).json({ error: true,  });
   }
