@@ -9,7 +9,6 @@ class Dishes {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
-          db.destroy();
         }
       );
     });
@@ -23,10 +22,8 @@ class Dishes {
           if (error) reject(error);
           if (results.length < 1 || _.isNull(results) || _.isUndefined(results)) {
             resolve(null);
-            db.destroy();
           } else {
             resolve(results[0]);
-            db.destroy();
           }
         }
       );
@@ -40,7 +37,6 @@ class Dishes {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
-          db.destroy();
         }
       );
     });
@@ -53,7 +49,6 @@ class Dishes {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
-          db.destroy();
         }
       );
     });
@@ -66,7 +61,6 @@ class Dishes {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
-          db.destroy();
         }
       );
     });
@@ -79,7 +73,6 @@ class Dishes {
         (error, results, fields) => {
           if (error) reject(error);
           resolve(results);
-          db.destroy();
         }
       );
     });
