@@ -27,7 +27,7 @@ exports.addCommand = async (req, res) => {
       pushToken: req.body.pushToken ? req.body.pushToken : null,
       nameOfClient: req.user.name,
       emailOfClient: req.user.email,
-      phoneNumberOfClient: req.body.phoneNumber,
+      phoneNumberOfClient: req.user.phoneNumber,
       address: req.body.type === "toTake" ? null : req.body.address,
       reference: req.body.reference ? req.body.reference : null,
       comment: req.body.comment,

@@ -1,79 +1,57 @@
-const User = require('../../Models/Users');
+const User = require("../../Models/Users");
 
-const validator = require("validator");
-const passwordValidator = require("password-validator");
-const _ = require('underscore');
+const _ = require("underscore");
 
 module.exports = (req, res, next) => {
   try {
-    const schema = new passwordValidator();// On crée une nouvelle instance de l'objet
-    schema// On crée un nouveau schéma
-      .is().min(8)                                    // Minimum length 8
-
-    if (req.method == 'PUT') {
-      if (req.body.password) {
-        if (schema.validate(req.body.password) && (req.body.name.length >= 2 && req.body.name.length < 30 && _.isString(req.body.name)) && (req.body.pseudo.length >= 2 && req.body.pseudo.length < 30 && _.isString(req.body.pseudo)) && (req.body.phoneNumber.toString().length === 12)) {
-          User.customQuery('SELECT * FROM users WHERE (email= ? OR pseudo= ?) AND idUser != ?', [req.body.email, req.body.pseudo, req.params.idUser])
-            .then(user => {
-              if (user.length > 0) {
-                if (user[0].email == req.body.email) {
-                  req.body.email.trim().length === 0 ? next() : res.status(400).json({ existEmail: true });
-                } else {
-                  res.status(400).json({ existPseudo: true });
-                }
-              } else {
-                next();
-              }
-            })
-            .catch(error => {
-              res.status(500).json({ error: true, });
-            });
-        } else {
-          res.status(400).json({ invalidForm: true });
-        }
-      } else {
-        if ((req.body.name.length >= 2 && req.body.name.length < 30 && _.isString(req.body.name)) && (req.body.pseudo.length >= 2 && req.body.pseudo.length < 30 && _.isString(req.body.pseudo)) && (req.body.phoneNumber.toString().length === 12)) {
-          User.customQuery('SELECT * FROM users WHERE (email= ? OR pseudo= ?) AND idUser != ?', [req.body.email, req.body.pseudo, req.params.idUser])
-            .then(user => {
-              if (user.length > 0) {
-                if (user[0].email == req.body.email) {
-                  req.body.email.trim().length === 0 ? next() : res.status(400).json({ existEmail: true });
-                } else {
-                  res.status(400).json({ existPseudo: true });
-                }
-              } else {
-                next();
-              }
-            })
-            .catch(error => {
-              res.status(500).json({ error: true, });
-            });
-        } else {
-          res.status(400).json({ invalidForm: true });
-        }
-      }
-    } else {
-      if (schema.validate(req.body.password) && (req.body.name.length >= 2 && req.body.name.length < 30 && _.isString(req.body.name)) && (req.body.pseudo.length >= 2 && req.body.pseudo.length < 30 && _.isString(req.body.pseudo)) && (req.body.phoneNumber.toString().length === 12)) {
-        User.customQuery('SELECT * FROM users WHERE (email= ? OR pseudo= ?) AND idUser != ?', [req.body.email, req.body.pseudo, req.params.idUser])
-          .then(user => {
+    if (req.method == "PUT") {
+      if (
+        req.body.name.length >= 2 &&
+        req.body.name.length < 30 &&
+        _.isString(req.body.name)
+      ) {
+        User.customQuery(
+          "SELECT * FROM users WHERE phoneNumber=? AND idUser != ?",
+          [req.body.phoneNumber, req.params.idUser]
+        )
+          .then((user) => {
             if (user.length > 0) {
-              if (user[0].email == req.body.email) {
-                req.body.email.trim().length === 0 ? next() : res.status(400).json({ existEmail: true });
-              } else {
-                res.status(400).json({ existPseudo: true });
-              }
+              return res.status(400).json({ existPhoneNumber: true, })
             } else {
               next();
             }
           })
-          .catch(error => {
-            res.status(500).json({ error: true, });
+          .catch((error) => {
+            res.status(500).json({ error: true });
+          });
+      } else {
+        res.status(400).json({ invalidForm: true });
+      }
+    } else {
+      if (
+        req.body.name.length >= 2 &&
+        req.body.name.length < 30 &&
+        _.isString(req.body.name)
+      ) {
+        User.customQuery(
+          "SELECT * FROM users WHERE phoneNumber=?",
+          [req.body.phoneNumber]
+        )
+          .then((user) => {
+            if (user.length > 0) {
+              return res.status(400).json({ existPhoneNumber: true, })
+            } else {
+              next();
+            }
+          })
+          .catch((error) => {
+            res.status(500).json({ error: true });
           });
       } else {
         res.status(400).json({ invalidForm: true });
       }
     }
   } catch (error) {
-    res.status(500).json({ error: true, });
+    res.status(500).json({ error: true });
   }
-}
+};

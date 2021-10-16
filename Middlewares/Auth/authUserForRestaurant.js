@@ -6,6 +6,7 @@ const UsersRestaurant = require('../../Models/UsersRestaurant');
 const Restaurants = require('../../Models/Restaurants');
 
 module.exports = (req, res, next) => {
+  console.log("lqjdfljd");
   try {
     const token = req.headers.authorization.split(' ')[1];
     const idUser = req.params.idUser;
@@ -46,6 +47,7 @@ module.exports = (req, res, next) => {
       res.status(400).json({ invalidToken: true });
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: true,  });
   }
 };
