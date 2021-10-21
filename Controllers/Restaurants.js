@@ -220,6 +220,10 @@ exports.getAllRestaurantWithType = async (req, res) => {
 
     for (let index in types) {
       let until = await Restaurants.customQuery('SELECT * FROM restaurants WHERE idType = ?', [types[index].idType]);
+      for (let index in until) {
+        let until2 = await Restaurants.customQuery('SELECT * FROM restaurantsMethod WHERE idRestaurant = ?', [until[index].idRestaurant]);
+        until[index] = {...until[index], methods: until2};
+      }
       response.push({ ...types[index], restaurants: until });
     }
 
