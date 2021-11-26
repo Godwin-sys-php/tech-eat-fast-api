@@ -48,6 +48,7 @@ exports.addCommand = async (req, res) => {
           await Commands.customQuery('INSERT INTO commandItems (idCommand, idDish, idOption, nameOfDish, nameOfOption, price, quantity) VALUES ?', [commandItems])
             .then(async (result) => {
               await Restaurants.customQuery("UPDATE number SET number = ? WHERE idRestaurant = ?", [actualNumber[0].number + 1, req.params.idRestaurant]);
+              req.app.get("socketService").broadcastEmiter(req.params.idRestaurant, "new command");
               return res.status(201).json({ create: true, insertId: insertId });
             })
             .catch(error => {
