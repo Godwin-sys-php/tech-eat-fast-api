@@ -112,7 +112,6 @@ module.exports = async (req, res, next) => {
       if (req.body.type === 'toDelive') {
         if (
           (_.isString(req.body.name) && req.body.name.length >= 5 && req.body.name.length < 100) &&
-          (_.isString(req.body.deviceId) && req.body.deviceId.length >= 5 && req.body.deviceId.length < 100) &&
           (_.isString(req.body.address) && req.body.address.length >= 5 && req.body.address.length < 300) &&
           (_.isString(req.body.comment) && req.body.comment.length >= 0 && req.body.comment.length < 300) &&
           (finalMethods.includes(req.body.type)) &&
@@ -154,7 +153,6 @@ module.exports = async (req, res, next) => {
       } else if (req.body.type === 'toTake') {
         if (
           (_.isString(req.body.name) && req.body.name.length >= 5 && req.body.name.length < 100) &&
-          (_.isString(req.body.deviceId) && req.body.deviceId.length >= 5 && req.body.deviceId.length < 100) &&
           (_.isString(req.body.comment) && req.body.comment.length >= 0 && req.body.comment.length < 300) &&
           (finalMethods.includes(req.body.type)) &&
           (pm.includes(req.body.paymentMethod)) &&

@@ -9,18 +9,24 @@ exports.login = (req, res) => {
   UsersRestaurant.findOne({ email: req.body.email })
     .then((user) => {
       if (!user) {
+        console.log(1);
         res.status(404).json({ email: false, password: false });
       } else {
+        console.log(2);
         bcrypt.compare(req.body.password, user.password)
-          .then((valid) => {
+          .then(async (valid) => {
             if (!valid) {
               res.status(401).json({ email: true, password: false });
             } else {
-              res.status(200).json({
+              if (req.body.notificationToken) {
+                await UsersRestaurant.updateOne({ notificationToken: req.body.notificationToken, }, { idUserRestaurant: user.idUserRestaurant });
+              }
+              return res.status(200).json({
                 idUser: user.idUserRestaurant,
+                user: user,
                 idRestaurant: user.idRestaurant,
                 token: jwt.sign({ idUserRestaurant: user.idUserRestaurant, idRestaurant: user.idRestaurant }, process.env.TOKEN, {
-                  expiresIn: "2d",
+                  expiresIn: "7d",
                 })
               });
             }

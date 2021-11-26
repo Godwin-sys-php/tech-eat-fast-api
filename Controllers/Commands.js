@@ -24,7 +24,6 @@ exports.addCommand = async (req, res) => {
       idRestaurant: req.params.idRestaurant,
       idUser: req.user.idUser,
       orderId: `${moment().format('YY')}-${actualNumber[0].number}`,
-      pushToken: req.body.pushToken ? req.body.pushToken : null,
       nameOfClient: req.user.name,
       emailOfClient: req.user.email,
       phoneNumberOfClient: req.user.phoneNumber,
@@ -86,8 +85,6 @@ exports.addCommandInRestaurant = async (req, res) => {
         idUser: null,
         idTable: req.body.idTable,
         orderId: `${moment().format('YY')}-${actualNumber[0].number}`,
-        deviceId: req.body.deviceId,
-        pushToken: req.body.pushToken ? req.body.pushToken : null,
         nameOfClient: req.body.name,
         tableId: tableId,
         emailOfClient: null,
@@ -296,23 +293,6 @@ exports.acceptCommand = async (req, res, next) => {
     if (command.status !== "done") {
       Commands.updateOne({ accept: true, status: "inCooking", lastUpdate: now.unix() }, { idCommand: req.params.idCommand })
         .then(async () => {
-          const message = {
-            to: command.pushToken,
-            sound: 'default',
-            title: 'Votre commande a été accepté 😉!',
-            body: 'Elle est en cuisine',
-            data: { idCommand: command.idCommand, type: command.type },
-          };
-
-          await fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Accept-encoding': 'gzip, deflate',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(message),
-          });
           if (command.idRestaurant === 2) {
             req.idCommand = command.idCommand;
             return next();
@@ -382,23 +362,6 @@ exports.setReady = async (req, res, next) => {
     if (command.status === "inCooking") {
       Commands.updateOne({ accept: true, status: command.type === "toDelive" ? "outOfRestaurant" : "ready", lastUpdate: now.unix() }, { idCommand: req.params.idCommand })
         .then(async () => {
-          const message = {
-            to: command.pushToken,
-            sound: 'default',
-            title: command.type === "toDelive" ? "Votre commande est en cours de livraison, patientez un peu ça en vaut la peine 😋" : "Votre commande est prête, vous pouvez venir la chercher 😋",
-            body: 'Vous y êtes presque',
-            data: { idCommand: command.idCommand, type: command.type },
-          };
-
-          await fetch('https://exp.host/--/api/v2/push/send', {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Accept-encoding': 'gzip, deflate',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(message),
-          });
           req.command = command;
           req.restoInfo = restoInfo;
           req.commandItems = commandItems;
@@ -464,6 +427,7 @@ exports.getNotDoneCommand = async (req, res) => {
     }
 
     res.status(200).json({ find: true, result: response });
+    // res.status(200).json({ invalidToken: true });
   } catch (error) {
     res.status(500).json({ error: true });
   }
@@ -485,6 +449,7 @@ exports.getOneCommand = async (req, res) => {
     const restoInfo = await Restaurants.findOne({ idRestaurant: command.idRestaurant });
 
     res.status(200).json({ find: true, result: { ...command, items: items, restoInfo: restoInfo } });
+    // res.status(200).json({ invalidToken: true });
   } catch (error) {
     res.status(500).json({ error: true });
   }

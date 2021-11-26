@@ -31,10 +31,12 @@ exports.signup = (req, res) => {
           return res.status(200).json({ create: true });
         })
         .catch((error) => {
+          console.log(error);
           res.status(500).json({ error: true });
         });
     })
     .catch((error) => {
+      console.log(error);
       res.status(500).json({ error: true });
     });
 };

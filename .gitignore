@@ -1,3 +1,8 @@
 node_modules/
 .env
 .env.production
+PDP_Resto/
+PDP_Users/
+Invoices/
+Images-Dishes/
+Images-Resto/

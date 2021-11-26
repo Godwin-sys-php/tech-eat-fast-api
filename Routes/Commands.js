@@ -8,6 +8,7 @@ const validatorCommandInRestaurant = require('../Middlewares/Validators/validato
 const existCommand = require('../Middlewares/Exists/existCommand');
 const authUserForCommands = require('../Middlewares/Auth/authUserForCommands');
 const authRestaurant = require('../Middlewares/Auth/authRestaurant');
+const authDeliver = require('../Middlewares/Auth/authDeliver');
 const authUserForGetAndDeleteCommand = require('../Middlewares/Auth/authUserForGetAndDeleteCommand');
 const authMobile = require('../Middlewares/Auth/authMobile');
 const authMobile2 = require('../Middlewares/Auth/authMobile2');
@@ -25,10 +26,11 @@ router.put('/:idCommand/accept', limits(200, 15), existCommand, authRestaurant, 
 router.put('/:idCommand/refuse', limits(200, 15), existCommand, authRestaurant, commandCtrl.refuseCommand);
 // router.put('/:idCommand', limits(200, 15), existCommand, authUser, authUserForUpdateOrDelete, commandCtrl.updateCommand);
 router.put('/:idCommand/setReady', limits(200, 15), existCommand, authRestaurant, commandCtrl.setReady, generator);
-router.put('/:idCommand/setDone', limits(200, 15), existCommand, authRestaurant, commandCtrl.setDone);
+router.put('/:idCommand/setDone', limits(200, 15), existCommand, authDeliver, commandCtrl.setDone);
 
-router.get('/restaurant/:idRestaurant/not-done', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getNotDoneCommand);
+router.get('/restaurant/:idRestaurant/not-done', limits(200, 15), existRestaurant, authDeliver, commandCtrl.getNotDoneCommand);
 router.get('/:idCommand', limits(200, 15), existCommand, authUserForGetAndDeleteCommand, commandCtrl.getOneCommand);
+router.get('/:idCommand/restaurant', limits(200, 15), existCommand, authDeliver, commandCtrl.getOneCommand);
 router.get('/:idCommand/notConnected', limits(200, 15), existCommand, commandCtrl.getOneCommandNotConnected);
 router.get('/restaurant/:idRestaurant/timestamp/:begin/:end', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getCommandOfRestaurantWithTimestamp);
 router.get('/restaurant/:idRestaurant/report/timestamp/:timestamp', limits(200, 15), existRestaurant, authRestaurant, commandCtrl.getOneDayReport);
