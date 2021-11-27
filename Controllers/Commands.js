@@ -7,6 +7,7 @@ const calculateSum = require('../Helpers/calculateSum');
 const createDishesTable = require('../Helpers/createDishesTable');
 const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
+const newCommandNotification = require("../Helpers/newCommandNotification");
 
 require('dotenv').config();
 
@@ -50,6 +51,7 @@ exports.addCommand = async (req, res) => {
               await Restaurants.customQuery("UPDATE number SET number = ? WHERE idRestaurant = ?", [actualNumber[0].number + 1, req.params.idRestaurant]);
               console.log("coucou");
               req.app.get("socketService").broadcastEmiter(req.params.idRestaurant, "new command");
+              await newCommandNotification(req.params.idRestaurant);
               return res.status(201).json({ create: true, insertId: insertId });
             })
             .catch(error => {
@@ -114,6 +116,7 @@ exports.addCommandInRestaurant = async (req, res) => {
                 await Restaurants.customQuery("UPDATE number SET number = ? WHERE idRestaurant = ?", [actualNumber[0].number + 1, req.params.idRestaurant]);
                 req.insertId = insertId;
                 req.app.get("socketService").broadcastEmiter(req.params.idRestaurant, "new command");
+                await newCommandNotification(req.params.idRestaurant);
                 return res.status(201).json({ create: true, insertId: insertId });
               })
               .catch(error => {
