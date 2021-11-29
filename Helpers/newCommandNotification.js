@@ -22,7 +22,7 @@ module.exports = async (idRestaurant) => {
                         experienceId: '@nodewin/tef-partners',
                         title: "Nouvelle commande " + restaurantInfo.name,
                         message: 'Vous avez une nouvelle commande venez la voir',
-                        channelId: "default",
+                        channelId: "commandReceiver",
                         priority: "max",
                     },
                 }),
