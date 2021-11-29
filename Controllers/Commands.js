@@ -55,13 +55,16 @@ exports.addCommand = async (req, res) => {
               return res.status(201).json({ create: true, insertId: insertId });
             })
             .catch(error => {
+              console.log(error);
               return res.status(500).json({ error: true, });
             });
         } catch (error) {
+          console.log(error);
           return res.status(500).json({ error: true });
         }
       })
       .catch((error) => {
+        console.log(error);
         return res.status(500).json({ error: true });
       });
   } catch (error) {
