@@ -16,10 +16,12 @@ module.exports = async (idRestaurant) => {
                 to: restaurantUsers[index].notificationToken,
                 priority: 'high',
                 data: {
+                    token: restaurantUsers[index].notificationToken,
                     experienceId: '@nodewin/tef-partners',
                     title: "Nouvelle commande " + restaurantInfo.name,
                     message: 'Vous avez une nouvelle commande venez la voir',
-                    android_channel_id: "default",
+                    channelId: "default",
+                    priority: "max",
                 },
             }),
         });
