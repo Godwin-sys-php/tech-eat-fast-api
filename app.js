@@ -20,6 +20,8 @@ const SocketService = require("./Utils/socket");
 
 require('dotenv').config();
 
+console.log(process.env.DATABASE_HOST);
+
 const app = express();
 
 const server = require('http').Server(app);

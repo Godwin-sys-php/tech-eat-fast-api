@@ -31,6 +31,7 @@ module.exports = (req, res, next) => {
       if (
         req.body.name.length >= 2 &&
         req.body.name.length < 30 &&
+        req.body.password.length >= 8 &&
         _.isString(req.body.name)
       ) {
         User.customQuery(

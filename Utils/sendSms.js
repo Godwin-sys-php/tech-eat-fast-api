@@ -23,5 +23,7 @@ module.exports = (phoneNumber, content) => {
       content: content,
       senderId: "TechEatFast"
     }),
-  }).then(res => res.json());
+  }).then(res => res.json()).then(data => {
+    console.log(data);
+  })
 }

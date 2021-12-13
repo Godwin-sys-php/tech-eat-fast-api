@@ -32,6 +32,8 @@ router.post('/forgot-password', limits(1500, 15), userCtrl.forgotPassword);
 router.post('/reset-password/:idUser', limits(1500, 15), existUser, userCtrl.resetPassword);
 
 router.put('/:idUser', limits(100, 15), existUser, authUserMostSecure, validatorUsers, userCtrl.updateOneUser); // Modifie un utilisateur
+router.put('/special/activate-account', limits(1500, 15), userCtrl.activateAccount);
+router.put('/special/ressend-code', limits(4, 1), userCtrl.resendCode);
 router.put('/:idUser/profile', limits(40, 15), existUser, authUserMostSecure, usersPDP, resizer(500, "PDP_Users"), userCtrl.changePDP); // Modifie la photo de profile d'un utilisateur
 router.put('/:idUser/address/:idAddress', limits(100, 15), existUser, existAddress, authUserMostSecure, validatorAddress, userCtrl.updateAddress); // Modifie une addresse d'un utilisateur
 router.put('/:idUser/phoneNumber/:idPhoneNumber', limits(40, 15), existUser, existPhoneNumber, authUserMostSecure, validatorPhoneNumber, userCtrl.updatePhoneNumber); // Modifie un numéro d'un utilisateur

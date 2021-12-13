@@ -8,16 +8,20 @@ const path = require("path");
 const moment = require("moment");
 const passwordValidator = require("password-validator");
 const createDishTableForCommandsSaved = require("../Helpers/createDishTableForCommandsSaved");
+const sendSms = require("../Utils/sendSms");
 
 require("dotenv").config();
 
-exports.signup = (req, res) => {
+exports.signup = async (req, res) => {
   const now = moment();
+  const hash = await bcrypt.hash(req.body.password, 10);
   const toInsert = {
     name: req.body.name,
     phoneNumber: req.body.phoneNumber,
     creationDate: now.unix(),
     pdpUrl: `${req.protocol}://${req.get("host")}/PDP_Users/default.jpg`,
+    password: hash,
+    activate: false,
   };
   Users.insertOne(toInsert)
     .then((result) => {
@@ -27,7 +31,11 @@ exports.signup = (req, res) => {
       };
 
       Users.customQuery("INSERT INTO usersPhoneNumber SET ?", [toInsert])
-        .then(() => {
+        .then(async () => {
+          const now2 = moment();
+          const code = Math.floor(1000 + Math.random() * 9000);
+          await sendSms(req.body.phoneNumber.substring(1), "Votre code de confirmation Tech'Eat Fast est " + code.toString());
+          await Users.updateOne({ sendDate: now2.unix(), codeSended: code.toString() }, { idUser: result.insertId })
           return res.status(200).json({ create: true });
         })
         .catch((error) => {
@@ -41,13 +49,58 @@ exports.signup = (req, res) => {
     });
 };
 
-exports.login = (req, res) => {
+exports.activateAccount = async (req, res) => {
+  if (req.body.phoneNumber && req.body.code) {
+    const user = await Users.findOne({ phoneNumber: req.body.phoneNumber, });
+    if (!user) {
+      return res.status(404).json({ userNotFound: true });
+    } else {
+      const now = moment();
+      if (user.sendDate + 900 >= now.unix()) {
+        if (user.codeSended === req.body.code) {
+          await Users.updateOne({ activate: true, }, {phoneNumber: req.body.phoneNumber});
+          return res.status(200).json({ activate: true, });
+        }
+        return res.status(400).json({ invalidCode: true, })
+      } else {
+        const now2 = moment();
+        const code = Math.floor(1000 + Math.random() * 9000);
+        await sendSms(req.body.phoneNumber.substring(1), "Votre code de confirmation Tech'Eat Fast est " + code.toString());
+        await Users.updateOne({ sendDate: now2.unix(), codeSended: code.toString() }, {phoneNumber: req.body.phoneNumber})
+
+        return res.status(400).json({ codeExpired: true, });
+      }
+    }
+  } else {
+    return res.status(400).json({ invalidForm: true, });
+  }
+}
+
+exports.resendCode = async (req, res) => {
+  if (req.body.phoneNumber) {
+    const user = await Users.findOne({ phoneNumber: req.body.phoneNumber, });
+    if (!user) {
+      return res.status(404).json({ userNotFound: true, });
+    } else {
+      const now = moment();
+      const code = Math.floor(1000 + Math.random() * 9000);
+      await sendSms(req.body.phoneNumber.substring(1), "Votre code de confirmation Tech'Eat Fast est " + code.toString());
+      await Users.updateOne({ sendDate: now.unix(), codeSended: code.toString() }, {phoneNumber: req.body.phoneNumber});
+
+      return res.status(400).json({ resended: true, });
+    }
+  } else {
+    return res.status(400).json({ invalidForm: true})
+  }
+}
+
+exports.login = async (req, res) => {
   Users.customQuery("SELECT * FROM users WHERE phoneNumber=?", [
     req.body.phoneNumber,
   ])
     .then(async (user) => {
       if (user.length < 1) {
-        res.status(404).json({ phoneNumber: false });
+        res.status(404).json({ phoneNumber: false, password: false, });
       } else {
         const users = await Users.findOne({ idUser: user[0].idUser });
         const phoneNumbers = await Users.customQuery(
@@ -58,15 +111,28 @@ exports.login = (req, res) => {
           "SELECT * FROM usersAddress WHERE idUser = ?",
           [user[0].idUser]
         );
-        res.status(200).json({
-          user: {
-            ...users,
-            phoneNumbers: phoneNumbers,
-            address: address,
-            password: null,
-          },
-          token: jwt.sign({ idUser: user[0].idUser }, process.env.TOKEN),
-        });
+        const valid = await bcrypt.compare(req.body.password, users.password);
+        if (valid) {
+          if (users.activate) {
+            res.status(200).json({
+              user: {
+                ...users,
+                phoneNumbers: phoneNumbers,
+                address: address,
+                password: null,
+              },
+              token: jwt.sign({ idUser: user[0].idUser }, process.env.TOKEN),
+            });
+          } else {
+            const now = moment();
+            const code = Math.floor(1000 + Math.random() * 9000);
+            await sendSms(req.body.phoneNumber.substring(1), "Votre code de confirmation Tech'Eat Fast est " + code.toString());
+            await Users.updateOne({ sendDate: now.unix(), codeSended: code.toString() }, {phoneNumber: req.body.phoneNumber});
+            return res.status(400).json({ accountNotActive: true, codeSended: true, });
+          }
+        } else {
+          res.status(404).json({ phoneNumber: true, password: false, });
+        }
       }
     })
     .catch((error) => {
@@ -80,7 +146,7 @@ exports.loginNoJwt = async (req, res) => {
   ])
     .then(async (user) => {
       if (user.length < 1) {
-        res.status(404).json({ phoneNumber: false });
+        res.status(404).json({ phoneNumber: false, password: false, });
       } else {
         const users = await Users.findOne({ idUser: user[0].idUser });
         const phoneNumbers = await Users.customQuery(
@@ -91,15 +157,19 @@ exports.loginNoJwt = async (req, res) => {
           "SELECT * FROM usersAddress WHERE idUser = ?",
           [user[0].idUser]
         );
-        res.status(200).json({
-          user: {
-            ...users,
-            phoneNumbers: phoneNumbers,
-            address: address,
-            password: null,
-          },
-          phoneNumber: true,
-        });
+        const valid = await bcrypt.compare(req.body.password, users.password);
+        if (valid) {
+          res.status(200).json({
+            user: {
+              ...users,
+              phoneNumbers: phoneNumbers,
+              address: address,
+              password: null,
+            },
+          });
+        } else {
+          res.status(404).json({ phoneNumber: true, password: false, });
+        }
       }
     })
     .catch((error) => {
@@ -278,9 +348,8 @@ exports.updateOneUser = (req, res) => {
 
 exports.changePDP = (req, res) => {
   const toSet = {
-    pdpUrl: `${req.protocol}://${req.get("host")}/PDP_Users/${
-      req.file.filename
-    }`,
+    pdpUrl: `${req.protocol}://${req.get("host")}/PDP_Users/${req.file.filename
+      }`,
   };
 
   Users.findOne({ idUser: req.params.idUser })
@@ -288,7 +357,7 @@ exports.changePDP = (req, res) => {
       const filename = user.pdpUrl.split("/PDP_Users/")[1];
       filename !== "default.jpg"
         ? fs.unlinkSync(path.join(__dirname, "../PDP_Users", filename))
-        : () => {};
+        : () => { };
 
       Users.updateOne(toSet, { idUser: req.params.idUser })
         .then(() => {

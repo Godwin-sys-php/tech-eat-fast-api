@@ -19,7 +19,7 @@ module.exports = async (idRestaurant) => {
                     priority: 'high',
                     data: {
                         token: restaurantUsers[index].notificationToken,
-                        experienceId: '@nodewin/tef-partners',
+                        experienceId: '@nodewin/tefp',
                         title: "Nouvelle commande " + restaurantInfo.name,
                         message: 'Vous avez une nouvelle commande venez la voir',
                         channelId: "commandReceiver",
