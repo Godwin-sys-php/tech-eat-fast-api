@@ -19,7 +19,17 @@ exports.login = (req, res) => {
               res.status(401).json({ email: true, password: false });
             } else {
               if (req.body.notificationToken) {
-                await UsersRestaurant.updateOne({ notificationToken: req.body.notificationToken, }, { idUserRestaurant: user.idUserRestaurant });
+                const tokens = await UsersRestaurant.customQuery("SELECT * FROM pushTokens WHERE idRestaurant = ?", [user.idRestaurant]);
+                let exist = false;
+                for (let index in tokens) {
+                  if (tokens[index].token === req.body.notificationToken) {
+                    exist = true;
+                    break;
+                  }
+                }
+                if (!exist) {
+                  await UsersRestaurant.customQuery("INSERT INTO pushTokens SET idRestaurant = ?, idUser=?, token=?", [user.idRestaurant, user.idUser, req.body.notificationToken]);
+                }
               }
               return res.status(200).json({
                 idUser: user.idUserRestaurant,
@@ -33,7 +43,7 @@ exports.login = (req, res) => {
           })
           .catch(error => {
             console.log(error);
-            res.status(500).json({ error: true,  });
+            res.status(500).json({ error: true, });
           });
       }
     })
