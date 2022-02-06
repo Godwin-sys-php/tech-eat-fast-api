@@ -28,7 +28,7 @@ exports.login = (req, res) => {
                   }
                 }
                 if (!exist) {
-                  await UsersRestaurant.customQuery("INSERT INTO pushTokens SET idRestaurant = ?, idUser=?, token=?", [user.idRestaurant, user.idUser, req.body.notificationToken]);
+                  await UsersRestaurant.customQuery("INSERT INTO pushTokens SET idRestaurant = ?, idUser=?, token=?", [user.idRestaurant, user.idUserRestaurant, req.body.notificationToken]);
                 }
               }
               return res.status(200).json({
