@@ -17,6 +17,7 @@ exports.signup = async (req, res) => {
   const hash = await bcrypt.hash(req.body.password, 10);
   const toInsert = {
     name: req.body.name,
+    username: req.body.username,
     phoneNumber: req.body.phoneNumber,
     creationDate: now.unix(),
     pdpUrl: `${req.protocol}://${req.get("host")}/PDP_Users/default.jpg`,
@@ -445,6 +446,10 @@ exports.getOneUser = async (req, res) => {
       "SELECT * FROM usersAddress WHERE idUser = ?",
       [req.params.idUser]
     );
+    const transactions = await Users.customQuery(
+      "SELECT * FROM walletTransactions WHERE idUser = ?",
+      [req.params.idUser]
+    );
 
     res.status(200).json({
       find: true,
@@ -452,6 +457,7 @@ exports.getOneUser = async (req, res) => {
         ...users,
         phoneNumbers: phoneNumbers,
         address: address,
+        transactions: transactions,
         password: null,
       },
     });

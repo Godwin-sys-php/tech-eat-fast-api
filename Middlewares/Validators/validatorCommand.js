@@ -22,7 +22,8 @@ module.exports = async (req, res, next) => {
           (_.isString(req.body.comment) && req.body.comment.length >= 0 && req.body.comment.length < 300) &&
           (finalMethods.includes(req.body.type)) &&
           (pm.includes(req.body.paymentMethod)) &&
-          (_.isArray(req.body.dishes) && (req.body.dishes.length > 0))
+          (_.isArray(req.body.dishes) && (req.body.dishes.length > 0)) &&
+          (_.isBoolean(req.body.useWallet))
         ) {
           const dishes = req.body.dishes
           for (let index in dishes) {

@@ -42,7 +42,20 @@ module.exports = (req, res, next) => {
             if (user.length > 0) {
               return res.status(400).json({ existPhoneNumber: true, })
             } else {
-              next();
+              User.customQuery(
+                "SELECT * FROM users WHERE username=?",
+                [req.body.username]
+              )
+                .then((user) => {
+                  if (user.length > 0) {
+                    return res.status(400).json({ existUsername: true, })
+                  } else {
+                    next();
+                  }
+                })
+                .catch((error) => {
+                  res.status(500).json({ error: true });
+                });
             }
           })
           .catch((error) => {
