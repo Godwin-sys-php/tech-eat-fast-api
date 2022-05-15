@@ -4,6 +4,7 @@ const _ = require('underscore');
 
 module.exports = async (req, res, next) => {
   try {
+    console.log(req.body);
     const pm2 = await Restaurants.customQuery('SELECT pm.name FROM PaymentMethodRestaurant pm WHERE pm.idRestaurant = ?', [req.params.idRestaurant]);
     let pm = [];
     pm2.forEach((el) => { pm.push(el.name); })
@@ -16,6 +17,7 @@ module.exports = async (req, res, next) => {
     const finalMethods = methods.map((obj) => obj.name );
 
     if (req.haveToken) {
+      console.log("qsdf");
       if (req.body.type === 'toDelive') {
         if (
           (_.isString(req.body.address) && req.body.address.length >= 5 && req.body.address.length < 300) &&
@@ -30,7 +32,7 @@ module.exports = async (req, res, next) => {
             if (dishes[index].hasOwnProperty("idDish") && dishes[index].hasOwnProperty("quantity")) {
               const dish = await Dishes.findOne({ idDish: dishes[index].idDish });
               if (dish.needOption === 1 && !dishes[index].hasOwnProperty("idOption")) {
-                res.status(400).json({ invalidForm: true });
+                return res.status(400).json({ invalidForm: true });
                 break;
               } else  {
                 const options2 = await Dishes.customQuery("SELECT * FROM dishOptions WHERE idDish = ?", [dishes[index].idDish]);
@@ -54,12 +56,14 @@ module.exports = async (req, res, next) => {
                 }
               }
             } else {
-              res.status(400).json({ invalidForm: true });
+              console.log("KLOLCADZSF");
+              res.status(400).json({ invaliloldForm: true });
               break;
             }
           }
           next();
         } else {
+          console.log("qsdf");
           res.status(400).json({ invalidForm: true });
         }
       } else if (req.body.type === 'toTake') {
@@ -98,15 +102,19 @@ module.exports = async (req, res, next) => {
                 }
               }
             } else {
+              console.log("KLOLCADZSF");
               res.status(400).json({ invalidForm: true });
               break;
             }
           }
+          console.log("efkan");
           next();
         } else {
+          console.log("abcdef");
           res.status(400).json({ invalidForm: true });
         }
       } else {
+        console.log("qsdfqzfdqzef");
         res.status(400).json({ invalidForm: true });
       }
     } else {

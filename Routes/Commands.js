@@ -22,7 +22,7 @@ router.post('/restaurant/:idRestaurant', limits(50, 15), existRestaurant, authUs
 router.post('/restaurant/:idRestaurant/inRestaurant', limits(50, 15), existRestaurant, authUserForCommands, validatorCommandInRestaurant, commandCtrl.addCommandInRestaurant); // Ajoute une commande sans la payée
 // router.post('/restaurant/:idRestaurant/andPay', limits(50, 15), existRestaurant, authUserForCommands, authMobile, validatorCommand, commandCtrl.addCommandAndPay); // Ajoute une commande en la payant (+ token)
 
-router.put('/:idCommand/accept', limits(200, 15), existCommand, authRestaurant, commandCtrl.acceptCommand, theConsulat); 
+router.put('/:idCommand/accept', limits(200, 15), existCommand, authRestaurant, commandCtrl.acceptCommand, /* theConsulat */); 
 router.put('/:idCommand/refuse', limits(200, 15), existCommand, authRestaurant, commandCtrl.refuseCommand);
 // router.put('/:idCommand', limits(200, 15), existCommand, authUser, authUserForUpdateOrDelete, commandCtrl.updateCommand);
 router.put('/:idCommand/setReady', limits(200, 15), existCommand, authRestaurant, commandCtrl.setReady, generator);

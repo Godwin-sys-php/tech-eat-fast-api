@@ -14,6 +14,7 @@ require("dotenv").config();
 
 exports.addCommand = async (req, res) => {
   try {
+
     const now = moment();
 
     let reduction = 0;
@@ -50,7 +51,8 @@ exports.addCommand = async (req, res) => {
             type: req.body.type,
             creationDate: now.unix(),
             lastUpdate: now.unix(),
-            total: total - reduction,
+            total: total,
+            deliveryFees: req.body.type === "toDelive" ? 1.5 : 0,
             paymentMethod: req.body.paymentMethod,
             accept: null,
             status: "inLoading",
@@ -70,9 +72,11 @@ exports.addCommand = async (req, res) => {
             creationDate: now.unix(),
             lastUpdate: now.unix(),
             total: total,
+            deliveryFees: req.body.type === "toDelive" ? 1.5 : 0,
             paymentMethod: req.body.paymentMethod,
             accept: null,
             status: "inLoading",
+            clientReduction: 0,
           };
 
     Commands.insertOne(toInsertCommand)
@@ -98,34 +102,34 @@ exports.addCommand = async (req, res) => {
 
               let alternative = {};
 
-              if (req.body.useWallet && req.user.walletAmount > 0) {
-                await Transactions.insertOne({
-                  idUser: req.user.idUser,
-                  nameOfUser: req.user.name,
-                  enter: 0,
-                  outlet: reduction,
-                  amountAfter: req.user.walletAmount - reduction,
-                  description: "Réduction du prix à la commande",
-                });
-                await Transactions.insertOne({
-                  idUser: req.user.idUser,
-                  nameOfUser: req.user.name,
-                  enter: total * (req.resto.percentGiven / 100),
-                  outlet: 0,
-                  amountAfter: (req.user.walletAmount - reduction) + (total * (req.resto.percentGiven / 100)),
-                  description: "Bonus de commande",
-                });
-                alternative = {
-                  bonus: total * (req.resto.percentGiven / 100),
-                  reduction: reduction,
-                  walletAmount: (req.user.walletAmount - reduction) + (total * (req.resto.percentGiven / 100)),
-                };
-              }
+              // if (req.body.useWallet && req.user.walletAmount > 0) {
+              //   await Transactions.insertOne({
+              //     idUser: req.user.idUser,
+              //     nameOfUser: req.user.name,
+              //     enter: 0,
+              //     outlet: reduction,
+              //     amountAfter: req.user.walletAmount - reduction,
+              //     description: "Réduction du prix à la commande",
+              //   });
+              //   await Transactions.insertOne({
+              //     idUser: req.user.idUser,
+              //     nameOfUser: req.user.name,
+              //     enter: total * (req.resto.percentGiven / 100),
+              //     outlet: 0,
+              //     amountAfter: (req.user.walletAmount - reduction) + (total * (req.resto.percentGiven / 100)),
+              //     description: "Bonus de commande",
+              //   });
+              //   alternative = {
+              //     bonus: total * (req.resto.percentGiven / 100),
+              //     reduction: reduction,
+              //     walletAmount: (req.user.walletAmount - reduction) + (total * (req.resto.percentGiven / 100)),
+              //   };
+              // }
 
               return res.status(201).json({ create: true, insertId: insertId, alternative: alternative, });
             })
-            .catch((error) => {
-              console.log(error);
+            .catch((err) => {
+              console.log(err);
               return res.status(500).json({ error: true });
             });
         } catch (error) {
@@ -179,6 +183,7 @@ exports.addCommandInRestaurant = async (req, res) => {
         creationDate: now.unix(),
         lastUpdate: now.unix(),
         total: total,
+        deliveryFees: 0,
         paymentMethod: req.body.paymentMethod,
         accept: null,
         status: "inLoading",

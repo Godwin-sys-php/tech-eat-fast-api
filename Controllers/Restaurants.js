@@ -138,6 +138,7 @@ exports.getAllRestaurant = (req, res) => {
       res.status(200).json({ find: true, result: resto })
     })
     .catch(error => {
+      console.log(error);
       res.status(500).json({ error: true,  });
     });
 };
