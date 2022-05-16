@@ -22,7 +22,7 @@ exports.signup = async (req, res) => {
     creationDate: now.unix(),
     pdpUrl: `${req.protocol}://${req.get("host")}/PDP_Users/default.jpg`,
     password: hash,
-    activate: false,
+    activate: true,
   };
   Users.insertOne(toInsert)
     .then((result) => {
@@ -35,7 +35,7 @@ exports.signup = async (req, res) => {
         .then(async () => {
           const now2 = moment();
           const code = Math.floor(1000 + Math.random() * 9000);
-          await sendSms(req.body.phoneNumber.substring(1), "Votre code de confirmation Tech'Eat Fast est " + code.toString());
+          // await sendSms(req.body.phoneNumber.substring(1), "Votre code de confirmation Tech'Eat Fast est " + code.toString());
           await Users.updateOne({ sendDate: now2.unix(), codeSended: code.toString() }, { idUser: result.insertId })
           return res.status(200).json({ create: true });
         })
